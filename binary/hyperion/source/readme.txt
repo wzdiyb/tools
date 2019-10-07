@@ -10,10 +10,10 @@
 # Hyperion: A runtime PE-Crypter                                              #
 #                                                                             #
 # VERSION                                                                     #
-# 2.0                                                                         #
+# 2.1                                                                         #
 #                                                                             #
 # DATE                                                                        #
-# 08/06/2019                                                                  #
+# 10/07/2019                                                                  #
 #                                                                             #
 # AUTHOR                                                                      #
 # belial - http://www.phobosys.de/hyperion                                    #
@@ -43,6 +43,9 @@
 # - Remove macros in Asm Code                                                 #
 #                                                                             #
 # CHANGELOG:                                                                  #
+#                                                                             #
+# v2.1:                                                                       #
+# - crappy makefile cleanup                                                   #
 #                                                                             #
 # v2.0:                                                                       #
 # - added 64-bit support                                                      #

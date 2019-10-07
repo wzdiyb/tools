@@ -8,7 +8,3 @@ all: hyperion
  
 hyperion: $(OBJ)
 	$(CC) $(CFLAGS) -o $(EXECUTABLE) $^
- 
-.PHONY:clean
-clean:
-	del Src\Crypter\*.o $(EXECUTABLE)
