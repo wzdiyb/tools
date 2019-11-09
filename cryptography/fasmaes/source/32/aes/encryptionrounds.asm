@@ -49,6 +49,7 @@ proc mixColumns23, data_ptr:DWORD, mul2_table_ptr:DWORD,\
     rept 4{
     ;element 3
     mov eax, [edx]
+    bswap eax
     mov cl, al
     shr eax,8
     xor cl, al
@@ -63,6 +64,7 @@ proc mixColumns23, data_ptr:DWORD, mul2_table_ptr:DWORD,\
     mov [current_column], ecx
     ;element 2
     mov eax, [edx]
+    bswap eax
     mov cl, al
     shr eax, 8
     mov ebx, [mul3_table_ptr]
@@ -80,6 +82,7 @@ proc mixColumns23, data_ptr:DWORD, mul2_table_ptr:DWORD,\
     mov [current_column], eax
     ;element 1
     mov eax, [edx]
+    bswap eax
     mov ebx, [mul3_table_ptr]
     xlatb
     mov cl, al
@@ -97,6 +100,7 @@ proc mixColumns23, data_ptr:DWORD, mul2_table_ptr:DWORD,\
     mov [current_column], eax
     ;element 0
     mov eax, [edx]
+    bswap eax
     mov ebx, [mul2_table_ptr]
     xlatb
     mov cl, al
@@ -112,6 +116,7 @@ proc mixColumns23, data_ptr:DWORD, mul2_table_ptr:DWORD,\
     shl eax, 8
     mov al, cl
     ;finished, store it
+    bswap eax
     mov [edx], eax
     add edx, COLUMN_SIZE
     }
@@ -124,50 +129,72 @@ proc mixColumns23, data_ptr:DWORD, mul2_table_ptr:DWORD,\
 
 endp
 
-;shifts the rows as desrcibed in the AES specification
-;the shift process is in the reversed order because of the
-;endiannes
-macro loadRow{
-    mov al, byte [ebx+00]
-    shl eax,8
-    mov al, byte [ebx+04]
-    shl eax,8
-    mov al, byte [ebx+08]
-    shl eax,8
-    mov al, byte [ebx+12]
-}
-
-macro storeRow{
-    mov byte [ebx+12], al
-    shr eax,8
-    mov byte [ebx+08], al
-    shr eax,8
-    mov byte [ebx+04], al
-    shr eax,8
-    mov byte [ebx+00], al
-}
-
 proc shiftRows, data_ptr:DWORD
 
     push eax
     push ebx
     mov ebx,[data_ptr]
 
-    loadRow
-    rol eax, 24
-    storeRow
     inc ebx
-    loadRow
-    rol eax, 16
-    storeRow
+    stdcall loadRow, ebx
+    rol eax,8
+    stdcall storeRow, eax, ebx
     inc ebx
-    loadRow
-    rol eax, 8
-    storeRow
+    stdcall loadRow, ebx
+    rol eax,16
+    stdcall storeRow, eax, ebx
+    inc ebx
+    stdcall loadRow, ebx
+    rol eax,24
+    stdcall storeRow, eax, ebx
 
     pop ebx
     pop eax
     ret
+
+endp
+
+proc loadRow, data_ptr:DWORD
+
+   push esi
+   mov esi,[data_ptr]
+
+   lodsb
+   shl eax,8
+   add esi,3
+   lodsb
+   shl eax,8
+   add esi,3
+   lodsb
+   shl eax,8
+   add esi,3
+   lodsb
+
+   pop esi
+   ret
+
+endp
+
+proc storeRow, row:DWORD, data_ptr:DWORD
+
+   push edi
+   mov edi,[data_ptr]
+   mov eax,[row]
+   rol eax,8
+
+   stosb
+   rol eax,8
+   add edi,3
+   stosb
+   rol eax,8
+   add edi,3
+   stosb
+   rol eax,8
+   add edi,3
+   stosb
+
+   pop edi
+   ret
 
 endp
 
@@ -182,8 +209,8 @@ proc addRoundKey data_ptr:DWORD, round_key_ptr:DWORD
     mov eax,[data_ptr]
     mov ebx,[round_key_ptr]
     rept 4{
-	 mov edx,[eax]
-	 xor edx,[ebx]
+	 mov edx,[ebx]
+	 xor edx,[eax]
 	 mov [eax],edx
 	 add eax,COLUMN_SIZE
 	 add ebx,COLUMN_SIZE

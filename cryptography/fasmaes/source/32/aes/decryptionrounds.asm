@@ -51,6 +51,7 @@ proc mixColumns9111314, data_ptr:DWORD, mul9_table_ptr:DWORD,\
     rept 4{
     ;element 3
     mov eax, [edx]
+    bswap eax
     mov ebx, [mul9_table_ptr]
     xlatb
     mov cl, al
@@ -69,6 +70,7 @@ proc mixColumns9111314, data_ptr:DWORD, mul9_table_ptr:DWORD,\
     mov [current_column], ecx
     ;element 2
     mov eax, [edx]
+    bswap eax
     mov ebx, [mul13_table_ptr]
     xlatb
     mov cl, al
@@ -90,6 +92,7 @@ proc mixColumns9111314, data_ptr:DWORD, mul9_table_ptr:DWORD,\
     mov [current_column], eax
     ;element 1
     mov eax, [edx]
+    bswap eax
     mov ebx, [mul11_table_ptr]
     xlatb
     mov cl, al
@@ -111,6 +114,7 @@ proc mixColumns9111314, data_ptr:DWORD, mul9_table_ptr:DWORD,\
     mov [current_column], eax
     ;element 0
     mov eax, [edx]
+    bswap eax
     mov ebx, [mul14_table_ptr]
     xlatb
     mov cl, al
@@ -130,6 +134,7 @@ proc mixColumns9111314, data_ptr:DWORD, mul9_table_ptr:DWORD,\
     shl eax, 8
     mov al, cl
     ;finished, store it
+    bswap eax
     mov [edx], eax
     add edx, COLUMN_SIZE
     }
@@ -149,17 +154,18 @@ proc inverseShiftRows, data_ptr:DWORD
     push ebx
     mov ebx,[data_ptr]
 
-    loadRow
-    rol eax, 8
-    storeRow
     inc ebx
-    loadRow
-    rol eax, 16
-    storeRow
+    stdcall loadRow, ebx
+    rol eax,24
+    stdcall storeRow, eax, ebx
     inc ebx
-    loadRow
-    rol eax, 24
-    storeRow
+    stdcall loadRow, ebx
+    rol eax,16
+    stdcall storeRow, eax, ebx
+    inc ebx
+    stdcall loadRow, ebx
+    rol eax,8
+    stdcall storeRow, eax, ebx
 
     pop ebx
     pop eax
