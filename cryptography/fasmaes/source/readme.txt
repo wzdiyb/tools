@@ -10,10 +10,10 @@
 # AES Implementation for Flat Assembler                                       #
 #                                                                             #
 # VERSION                                                                     #
-# 1.2                                                                         #
+# 1.3                                                                         #
 #                                                                             #
 # DATE                                                                        #
-# 11.04.2019                                                                  #
+# 11.011.2019                                                                 #
 #                                                                             #
 # AUTHOR                                                                      #
 # belial - http://www.nullsecurity.net/                                       #
@@ -23,7 +23,7 @@
 #                                                                             #
 # DESCRIPTION                                                                 #
 # An AES-128, AES-192 and AES-256 implementation for FASM. Uses the the x86   #
-# 32-bit or 32-bit instruction set and operates completely on the stack. No   #
+# 32-bit or 64-bit instruction set and operates completely on the stack. No   #
 # data segments are necessary which makes it easy to integrate the AES        #
 # functions in any existing project. The implementation is not optimized      #
 # for speed but for easy maintainability.                                     #
@@ -56,6 +56,10 @@
 #   and ugly way ;)                                                           #
 #                                                                             #
 # CHANGELOG:                                                                  #
+#                                                                             #
+# v1.3:                                                                       #
+# - fixed bug: little/big endian byte order                                   #
+# - fixed bug: wrong implementation of shiftRows                              #
 #                                                                             #
 # v1.2:                                                                       #
 # - added a 64 bit port                                                       #
