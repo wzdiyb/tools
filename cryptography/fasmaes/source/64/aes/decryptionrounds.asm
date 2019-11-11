@@ -26,7 +26,7 @@ proc decryptionRounds decryption_ptr:QWORD,\
 dr_main:
     fastcall addRoundKey, rbx, r12
     fastcall mixColumns9111314, rbx, [mul9_table_ptr], [mul11_table_ptr],\
-            [mul13_table_ptr], [mul14_table_ptr]
+	    [mul13_table_ptr], [mul14_table_ptr]
     fastcall inverseShiftRows, rbx
     fastcall subBlockBytes, rbx, [inverse_sbox_ptr]
     sub r12, BLOCK_SIZE
@@ -57,6 +57,7 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     rept 4{
     ;element 3
     mov eax, [rdx]
+    bswap eax
     mov rbx, [mul9_table_ptr]
     xlatb
     mov cl, al
@@ -75,6 +76,7 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     mov [current_column], ecx
     ;element 2
     mov eax, [rdx]
+    bswap eax
     mov rbx, [mul13_table_ptr]
     xlatb
     mov cl, al
@@ -96,6 +98,7 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     mov [current_column], eax
     ;element 1
     mov eax, [rdx]
+    bswap eax
     mov rbx, [mul11_table_ptr]
     xlatb
     mov cl, al
@@ -117,6 +120,7 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     mov [current_column], eax
     ;element 0
     mov eax, [rdx]
+    bswap eax
     mov rbx, [mul14_table_ptr]
     xlatb
     mov cl, al
@@ -136,6 +140,7 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     shl eax, 8
     mov al, cl
     ;finished, store it
+    bswap eax
     mov [rdx], eax
     add rdx, COLUMN_SIZE
     }
@@ -150,17 +155,18 @@ proc inverseShiftRows, data_ptr:QWORD
     push rbx
     mov rbx,rcx;[data_ptr]
 
-    loadRow
-    rol eax, 8
-    storeRow
     inc rbx
-    loadRow
-    rol eax, 16
-    storeRow
-    inc rbx
-    loadRow
+    fastcall loadRow, rbx
     rol eax, 24
-    storeRow
+    fastcall storeRow, rax, rbx
+    inc rbx
+    fastcall loadRow, rbx
+    rol eax, 16
+    fastcall storeRow, rax, rbx
+    inc rbx
+    fastcall loadRow, rbx
+    rol eax, 8
+    fastcall storeRow, rax, rbx
 
     pop rbx
     ret

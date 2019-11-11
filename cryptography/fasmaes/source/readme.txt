@@ -23,7 +23,7 @@
 #                                                                             #
 # DESCRIPTION                                                                 #
 # An AES-128, AES-192 and AES-256 implementation for FASM. Uses the the x86   #
-# 32-bit instruction set and operates completely on the stack. No additional  #
+# 32-bit or 32-bit instruction set and operates completely on the stack. No   #
 # data segments are necessary which makes it easy to integrate the AES        #
 # functions in any existing project. The implementation is not optimized      #
 # for speed but for easy maintainability.                                     #

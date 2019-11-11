@@ -23,7 +23,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
     push rbx
     push rsi
     push rdi
-        
+	
     ;sbox and rcon are created in memory
     ;galois lookup tables too
     lea rax,[sbox]
@@ -47,7 +47,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
 
     ;create the round keys
     fastcall createKeyChain, [keychain_ptr], [sbox_ptr],\
-            [rcon_ptr]
+	    [rcon_ptr]
 
     ;copy clear text to encryption buffer
     mov rcx, [size]
@@ -62,7 +62,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
     add rbx,[size]
 eaes_block_loop:
     fastcall encryptionRounds, rsi, [keychain_ptr], \
-            [sbox_ptr], [mul2_table_ptr], [mul3_table_ptr]
+	    [sbox_ptr], [mul2_table_ptr], [mul3_table_ptr]
 
     add rsi,BLOCK_SIZE
     cmp rsi,rbx
@@ -96,7 +96,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
     push rbx
     push rsi
     push rdi
-        
+	
     ;sbox, invert sbox
     ;and rcon are created in memory
     lea rax,[sbox]
@@ -120,7 +120,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
     lea rax,[galois_mul14]
     mov [mul14_table_ptr], rax
     fastcall createGaloisDecryption, [mul9_table_ptr],\
-        [mul11_table_ptr], [mul13_table_ptr], [mul14_table_ptr]
+	[mul11_table_ptr], [mul13_table_ptr], [mul14_table_ptr]
 
     ;copy the key into the round key buffer
     mov rcx, KEY_SIZE
@@ -131,7 +131,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
 
     ;create the round keys
     fastcall createKeyChain, [keychain_ptr], [sbox_ptr],\
-            [rcon_ptr]
+	    [rcon_ptr]
 
     ;copy encrypted text to decryption buffer
     mov rcx, [size]
@@ -146,8 +146,8 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
     add rbx,[size]
 daes_block_loop:
     fastcall decryptionRounds, rsi, [keychain_ptr],\
-            [invert_sbox_ptr], [mul9_table_ptr], [mul11_table_ptr],\
-            [mul13_table_ptr], [mul14_table_ptr]
+	    [invert_sbox_ptr], [mul9_table_ptr], [mul11_table_ptr],\
+	    [mul13_table_ptr], [mul14_table_ptr]
 
     add rsi,BLOCK_SIZE
     cmp rsi,rbx
