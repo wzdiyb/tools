@@ -1,5 +1,10 @@
 #include "hyperion.h"
 
+#define CBC 0
+#define CTR 0
+#define ECB 1
+#include <aes.h>
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,22 +55,13 @@ BOOL encryptFile(uint8_t* input_file, unsigned int file_size,
  * (e.g. if the AES APIs could not been loaded).
  */
 BOOL encryptAES(uint8_t* input, unsigned int size, uint8_t* key){
-        //load the dll and the encryption api
-        //parameter: size, cleartext, encrypted text, key
-        HINSTANCE hDLL = LoadLibrary(AES_DLL);
-        if(!hDLL) {
-                fprintf(stderr, "Could not load %s\n", AES_DLL);
-                return FALSE;
-        }
-        void (__stdcall *aesEncrypt)(uint32_t, uint8_t*, uint8_t*, uint8_t*) =
-                (void (__stdcall *)(uint32_t, uint8_t*, uint8_t*, uint8_t*))
-                GetProcAddress(hDLL, AES_ENCRYPT_API);
-        if(!aesEncrypt) {
-                fprintf(stderr, "Could not load %s()\n", AES_ENCRYPT_API);
-                return FALSE;
-        }
+		int i;
+		struct AES_ctx ctx;
+		AES_init_ctx(&ctx, key);
 
-        //call the encryption api and do the encryption
-        aesEncrypt(size, input, input, key);
+		for (i = 0; i < size; i+=AES_BLOCKLEN)
+		{
+			AES_ECB_encrypt(&ctx, input + i);
+		}
         return TRUE;
 }

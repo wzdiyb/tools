@@ -10,10 +10,10 @@
 # Hyperion: A runtime PE-Crypter                                              #
 #                                                                             #
 # VERSION                                                                     #
-# 2.1                                                                         #
+# 2.2                                                                         #
 #                                                                             #
 # DATE                                                                        #
-# 10/07/2019                                                                  #
+# 12/11/2019                                                                  #
 #                                                                             #
 # AUTHOR                                                                      #
 # belial - http://www.phobosys.de/hyperion                                    #
@@ -43,6 +43,10 @@
 # - Remove macros in Asm Code                                                 #
 #                                                                             #
 # CHANGELOG:                                                                  #
+#                                                                             #
+# v2.2:                                                                       #
+# - removed aes.dll blob and use tinyAes c implementation instead             #
+# - aes payload uses new FasmAES 1.3 which has several bugfixes               # 
 #                                                                             #
 # v2.1:                                                                       #
 # - crappy makefile cleanup                                                   #

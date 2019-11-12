@@ -1,7 +1,7 @@
 ;creates the round keys in keychain_ptr
 if defined AES128
 proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
-                    rcon_ptr:QWORD
+		    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx
@@ -9,10 +9,9 @@ proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
      push r12
      push r13
      push rbx
-     sub rsp,8
 
      mov r12, ROW_SIZE-1 ;rcx
-     mov r13, 1          ;rdx
+     mov r13, 1 	 ;rdx
 
 key_schedule_round:
      ;-------------------
@@ -28,7 +27,7 @@ key_schedule_round:
      inc r13
      ;xor with column at index-ROW_SIZE-1
      mov rbx,rax
-     push r12 ;TODO: fix stack alignment
+     push r12
      sub r12,ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr],r12
      pop r12
@@ -42,15 +41,15 @@ key_schedule_round:
      ;three times: get current column and
      ;xor it with ecx-ROW_SIZE-1
      rept 3{
-          fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-          mov rbx, rax
-          push r12 ;TODO: fix stack alignment
-          sub r12,ROW_SIZE-1
-          fastcall loadColumn, [keychain_ptr],r12
-          pop r12
-          xor rax,rbx
-          inc r12
-          fastcall storeColumn, rax, [keychain_ptr], r12
+	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+	  mov rbx, rax
+	  push r12
+	  sub r12,ROW_SIZE-1
+	  fastcall loadColumn, [keychain_ptr],r12
+	  pop r12
+	  xor rax,rbx
+	  inc r12
+	  fastcall storeColumn, rax, [keychain_ptr], r12
      }
      ;-------------------
 
@@ -58,7 +57,6 @@ key_schedule_round:
      cmp r12, EXTENDED_KEY_SIZE/COLUMN_SIZE - 1
      jne key_schedule_round
 
-     add rsp,8
      pop rbx
      pop r13
      pop r12
@@ -68,7 +66,7 @@ end if
 
 if defined AES192
 proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
-                    rcon_ptr:QWORD
+		    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx
@@ -76,10 +74,9 @@ proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
      push r12
      push r13
      push rbx
-     sub rsp,8
 
      mov r12, ROW_SIZE-1 ;rcx
-     mov r13, 1          ;rdx
+     mov r13, 1 	 ;rdx
 
 key_schedule_round:
      ;-------------------
@@ -95,7 +92,7 @@ key_schedule_round:
      inc r13
      ;xor with column at index-ROW_SIZE-1
      mov rbx,rax
-     push r12 ;TODO: fix stack alignment
+     push r12
      sub r12,ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr],r12
      pop r12
@@ -109,15 +106,15 @@ key_schedule_round:
      ;three times: get current column and
      ;xor it with ecx-ROW_SIZE-1
      rept 3{
-          fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-          mov rbx, rax
-          push r12 ;TODO: fix stack alignment
-          sub r12,ROW_SIZE-1
-          fastcall loadColumn, [keychain_ptr],r12
-          pop r12
-          xor rax,rbx
-          inc r12
-          fastcall storeColumn, rax, [keychain_ptr], r12
+	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+	  mov rbx, rax
+	  push r12
+	  sub r12,ROW_SIZE-1
+	  fastcall loadColumn, [keychain_ptr],r12
+	  pop r12
+	  xor rax,rbx
+	  inc r12
+	  fastcall storeColumn, rax, [keychain_ptr], r12
      }
      ;-------------------
 
@@ -129,22 +126,21 @@ key_schedule_round:
      ;two times: get current column and
      ;xor it with ecx-ROW_SIZE-1
      rept 2{
-          fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-          mov rbx, rax
-          push r12 ;TODO: fix stack alignment
-          sub r12,ROW_SIZE-1
-          fastcall loadColumn, [keychain_ptr],r12
-          pop r12
-          xor rax,rbx
-          inc r12
-          fastcall storeColumn, rax, [keychain_ptr], r12
+	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+	  mov rbx, rax
+	  push r12
+	  sub r12,ROW_SIZE-1
+	  fastcall loadColumn, [keychain_ptr],r12
+	  pop r12
+	  xor rax,rbx
+	  inc r12
+	  fastcall storeColumn, rax, [keychain_ptr], r12
      }
      ;-------------------
 
      jmp key_schedule_round
 
 exit_key_schedule_round:
-     add rsp,8
      pop rbx
      pop r13
      pop r12
@@ -154,7 +150,7 @@ end if
 
 if defined AES256
 proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
-                    rcon_ptr:QWORD
+		    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx
@@ -162,10 +158,9 @@ proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
      push r12
      push r13
      push rbx
-     sub rsp,8
 
      mov r12, ROW_SIZE-1 ;rcx
-     mov r13, 1          ;rdx
+     mov r13, 1 	 ;rdx
 
 key_schedule_round:
      ;-------------------
@@ -181,7 +176,7 @@ key_schedule_round:
      inc r13
      ;xor with column at index-ROW_SIZE-1
      mov rbx,rax
-     push r12 ;TODO: fix stack alignment
+     push r12
      sub r12,ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr],r12
      pop r12
@@ -195,15 +190,15 @@ key_schedule_round:
      ;three times: get current column and
      ;xor it with ecx-ROW_SIZE-1
      rept 3{
-          fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-          mov rbx, rax
-          push r12 ;TODO: fix stack alignment
-          sub r12,ROW_SIZE-1
-          fastcall loadColumn, [keychain_ptr],r12
-          pop r12
-          xor rax,rbx
-          inc r12
-          fastcall storeColumn, rax, [keychain_ptr], r12
+	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+	  mov rbx, rax
+	  push r12
+	  sub r12,ROW_SIZE-1
+	  fastcall loadColumn, [keychain_ptr],r12
+	  pop r12
+	  xor rax,rbx
+	  inc r12
+	  fastcall storeColumn, rax, [keychain_ptr], r12
      }
      ;-------------------
 
@@ -219,7 +214,7 @@ key_schedule_round:
      fastcall loadColumn, [keychain_ptr], r12 ;can be removed
      fastcall subBytes, rax, [sbox_ptr]
      mov rbx, rax
-     push r12 ;TODO: fix stack alignment
+     push r12
      sub r12,ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr],r12
      pop r12
@@ -228,22 +223,21 @@ key_schedule_round:
      fastcall storeColumn, rax, [keychain_ptr], r12
      ;three times
      rept 3{
-          fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-          mov rbx, rax
-          push r12 ;TODO: fix stack alignment
-          sub r12,ROW_SIZE-1
-          fastcall loadColumn, [keychain_ptr],r12
-          pop r12
-          xor rax,rbx
-          inc r12
-          fastcall storeColumn, rax, [keychain_ptr], r12
+	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+	  mov rbx, rax
+	  push r12
+	  sub r12,ROW_SIZE-1
+	  fastcall loadColumn, [keychain_ptr],r12
+	  pop r12
+	  xor rax,rbx
+	  inc r12
+	  fastcall storeColumn, rax, [keychain_ptr], r12
      }
      ;-------------------
 
      jmp key_schedule_round
 
 exit_key_schedule_round:
-     add rsp,8
      pop rbx
      pop r13
      pop r12
@@ -264,6 +258,7 @@ proc storeColumn column:QWORD, keychain_ptr:QWORD, column_index:QWORD
      mul r9
      add rax, [keychain_ptr]
      mov rcx, [column]
+     bswap ecx
      mov [rax], ecx
 
      ret
@@ -271,14 +266,12 @@ endp
 
 ;xor key dword with (rcon(index) 00 00 00)
 proc xorRcon key:QWORD, rcon_ptr:QWORD, rcon_index:QWORD
-     push rbx ;leaf function
-
+     push rbx
      mov rax,r8 ; [rcon_index]
      mov rbx,rdx; [rcon_ptr]
      xlatb
      shl rax,24
      xor eax,ecx ;[key]
-
      pop rbx
      ret
 endp
@@ -292,14 +285,13 @@ proc loadColumn keychain_ptr:QWORD, column_index:QWORD
      add rax, rcx ;[keychain_ptr]
      ;return dword and exit
      mov eax,[rax]
-
+     bswap eax
      ret
 endp
 
 ;substitute subkey's bytes with the sbox
 proc subBytes subkey:QWORD, sbox_ptr:QWORD
-     push rbx ;leaf function
-
+     push rbx
      mov rax,rcx ;[subkey]
      mov rbx,rdx ;[sbox_ptr]
      xlatb
@@ -310,7 +302,6 @@ proc subBytes subkey:QWORD, sbox_ptr:QWORD
      ror eax, 8
      xlatb
      ror eax, 8
-
      pop rbx
      ret
 endp

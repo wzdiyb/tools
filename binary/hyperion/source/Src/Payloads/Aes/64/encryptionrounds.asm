@@ -10,7 +10,6 @@ proc encryptionRounds encryption_ptr:QWORD,\
     push rbx
     push r12
     push r13
-    sub rsp,8 ;TODO: Check alignment here
 
     ;roundkey and encryption in eax and ebx
     mov r12,[roundkeys_ptr]
@@ -37,7 +36,6 @@ er_main:
     fastcall shiftRows, rbx
     fastcall addRoundKey, rbx, r12
 
-    add rsp,8
     pop r13
     pop r12
     pop rbx
@@ -49,17 +47,18 @@ endp
 proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
      mul3_table_ptr:QWORD
 
-    local current_column:DWORD
+     local current_column:DWORD
 
     mov [data_ptr],rcx
     mov [mul2_table_ptr],rdx
     mov [mul3_table_ptr],r8
-    push rbx ;leaf function
-        
+    push rbx
+	
     mov rdx, [data_ptr]
     rept 4{
     ;element 3
     mov eax, [rdx]
+    bswap eax
     mov cl, al
     shr eax,8
     xor cl, al
@@ -74,6 +73,7 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     mov [current_column], ecx
     ;element 2
     mov eax, [rdx]
+    bswap eax
     mov cl, al
     shr eax, 8
     mov rbx, [mul3_table_ptr]
@@ -91,6 +91,7 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     mov [current_column], eax
     ;element 1
     mov eax, [rdx]
+    bswap eax
     mov rbx, [mul3_table_ptr]
     xlatb
     mov cl, al
@@ -108,6 +109,7 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     mov [current_column], eax
     ;element 0
     mov eax, [rdx]
+    bswap eax
     mov rbx, [mul2_table_ptr]
     xlatb
     mov cl, al
@@ -123,6 +125,7 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     shl eax, 8
     mov al, cl
     ;finished, store it
+    bswap eax
     mov [rdx], eax
     add rdx, COLUMN_SIZE
     }
@@ -132,45 +135,68 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
 
 endp
 
-;shifts the rows as desrcibed in the AES specification
-;the shift process is in the reversed order because of the
-;endiannes
-macro loadRow{
-    mov al, byte [rbx+00]
-    shl eax,8
-    mov al, byte [rbx+04]
-    shl eax,8
-    mov al, byte [rbx+08]
-    shl eax,8
-    mov al, byte [rbx+12]
-}
+proc loadRow, data_ptr:QWORD
 
-macro storeRow{
-    mov byte [rbx+12], al
-    shr eax,8
-    mov byte [rbx+08], al
-    shr eax,8
-    mov byte [rbx+04], al
-    shr eax,8
-    mov byte [rbx+00], al
-}
+   push rsi
+   mov rsi,rcx ;[data_ptr]
+   xor rax,rax
+
+   lodsb
+   shl eax,8
+   add rsi,3
+   lodsb
+   shl eax,8
+   add rsi,3
+   lodsb
+   shl eax,8
+   add rsi,3
+   lodsb
+
+   pop rsi
+   ret
+
+endp
+
+proc storeRow, row:QWORD, data_ptr:QWORD
+
+   push rdi
+   mov rdi,rdx ;[data_ptr]
+   mov eax,ecx ;[row]
+   rol eax,8
+
+   stosb
+   rol eax,8
+   add rdi,3
+   stosb
+   rol eax,8
+   add rdi,3
+   stosb
+   rol eax,8
+   add rdi,3
+   stosb
+
+   pop rdi
+   ret
+
+endp
 
 proc shiftRows, data_ptr:DWORD
 
-    push rbx ;leaf function
+    push rbx
     mov rbx,rcx ;[data_ptr]
 
-    loadRow
-    rol eax, 24
-    storeRow
     inc rbx
-    loadRow
-    rol eax, 16
-    storeRow
-    inc rbx
-    loadRow
+    fastcall loadRow, rbx
     rol eax, 8
-    storeRow
+    fastcall storeRow, rax, rbx
+    inc rbx
+    fastcall loadRow, rbx
+    rol eax, 16
+    fastcall storeRow, rax, rbx
+    inc rbx
+    fastcall loadRow, rbx
+    rol eax, 24
+    fastcall storeRow, rax, rbx
 
     pop rbx
     ret
@@ -189,36 +215,35 @@ proc addRoundKey data_ptr:QWORD, round_key_ptr:QWORD
     mov r8,[rcx]
     xor r8,[rdx]
     mov [rcx],r8
-
     ret
 
 endp
 
 ;substitute aes block with s-box
 proc subBlockBytes data_ptr:QWORD, sbox_ptr:QWORD
-    push rbx ;leaf function
+    push rbx
 
     mov rbx,rdx ;sbox
     rept 2{
-         mov rax,[rcx] ;data_ptr
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         xlatb
-         ror rax, 8
-         mov [rcx], rax
-         add rcx,COLUMN_SIZE*2
+	 mov rax,[rcx] ;data_ptr
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 xlatb
+	 ror rax, 8
+	 mov [rcx], rax
+	 add rcx,COLUMN_SIZE*2
     }
 
     pop rbx

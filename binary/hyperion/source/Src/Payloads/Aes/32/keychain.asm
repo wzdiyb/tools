@@ -240,6 +240,7 @@ proc storeColumn column:DWORD, keychain_ptr:DWORD, column_index:DWORD
      mul ebx
      add eax, [keychain_ptr]
      mov ebx, [column]
+     bswap ebx
      mov [eax], ebx
 
      pop edx
@@ -272,6 +273,7 @@ proc loadColumn keychain_ptr:DWORD, column_index:DWORD
      add eax, [keychain_ptr]
      ;return dword and exit
      mov eax,[eax]
+     bswap eax
      pop edx
      pop ebx
      ret

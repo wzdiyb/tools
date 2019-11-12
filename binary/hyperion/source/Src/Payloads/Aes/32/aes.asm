@@ -15,7 +15,6 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
       mul3_table_ptr:DWORD, sbox_ptr:DWORD, keychain_ptr:DWORD,\
       rcon_ptr:DWORD
 
-    pushad
     ;sbox and rcon are created in memory
     ;galois lookup tables too
     lea eax,[sbox]
@@ -40,6 +39,8 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
     ;create the round keys
     stdcall createKeyChain, [keychain_ptr], [sbox_ptr],\
 	    [rcon_ptr]
+    mov eax, [keychain_ptr]
+    ;int 3
 
     ;copy clear text to encryption buffer
     mov ecx, [size]
@@ -60,8 +61,6 @@ eaes_block_loop:
     cmp eax,ebx
     jnge eaes_block_loop
 
-    popad
-    mov eax,1
     ret
 
 endp
@@ -79,7 +78,6 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
       mul14_table_ptr:DWORD, sbox_ptr:DWORD, invert_sbox_ptr:DWORD,\
       keychain_ptr:DWORD, rcon_ptr:DWORD
 
-    pushad
     ;sbox, invert sbox
     ;and rcon are created in memory
     lea eax,[sbox]
@@ -135,8 +133,6 @@ daes_block_loop:
     cmp eax,ebx
     jnge daes_block_loop
 
-    popad
-    mov eax,1
     ret
 
 endp
