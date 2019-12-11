@@ -1,5 +1,5 @@
 ;uses the generated round keys to decrypt an aes block
-proc decryptionRounds decryption_ptr:QWORD,\
+proc decryptionRounds uses rbx r12, decryption_ptr:QWORD,\
      roundkeys_ptr:QWORD, inverse_sbox_ptr:QWORD, mul9_table_ptr:QWORD, \
      mul11_table_ptr:QWORD, mul13_table_ptr:QWORD,\
      mul14_table_ptr:QWORD
@@ -8,8 +8,6 @@ proc decryptionRounds decryption_ptr:QWORD,\
     mov [roundkeys_ptr], rdx
     mov [inverse_sbox_ptr], r8
     mov [mul9_table_ptr], r9
-    push rbx
-    push r12
 
     ;roundkey and decryption in eax and ebx
     mov r12, [roundkeys_ptr]
@@ -35,14 +33,12 @@ dr_main:
 
     ;initial_round
     fastcall addRoundKey, rbx, r12
-    pop r12
-    pop rbx
     ret
 endp
 
 ;mix columns operation is a column matrix
 ;multiplication
-proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
+proc mixColumns9111314 uses rbx, data_ptr:QWORD, mul9_table_ptr:QWORD,\
      mul11_table_ptr:QWORD, mul13_table_ptr:QWORD, mul14_table_ptr:QWORD
 
      local current_column:DWORD
@@ -51,7 +47,6 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     mov [mul9_table_ptr], rdx
     mov [mul11_table_ptr], r8
     mov [mul13_table_ptr], r9
-    push rbx
 
     mov rdx, [data_ptr]
     rept 4{
@@ -145,14 +140,12 @@ proc mixColumns9111314, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     add rdx, COLUMN_SIZE
     }
 
-    pop rbx
     ret
 endp
 
 ;reverse shift operation for decryption
-proc inverseShiftRows, data_ptr:QWORD
+proc inverseShiftRows uses rbx, data_ptr:QWORD
 
-    push rbx
     mov rbx,rcx;[data_ptr]
 
     inc rbx
@@ -168,7 +161,6 @@ proc inverseShiftRows, data_ptr:QWORD
     rol eax, 8
     fastcall storeRow, rax, rbx
 
-    pop rbx
     ret
 
 endp

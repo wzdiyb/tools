@@ -1,5 +1,5 @@
 ;uses the generated round keys to encrypt an aes block
-proc encryptionRounds encryption_ptr:QWORD,\
+proc encryptionRounds uses rbx r12 r13, encryption_ptr:QWORD,\
      roundkeys_ptr:QWORD, sbox_ptr:QWORD, mul2_table_ptr:QWORD, \
      mul3_table_ptr:QWORD
 
@@ -7,9 +7,6 @@ proc encryptionRounds encryption_ptr:QWORD,\
     mov [roundkeys_ptr],rdx
     mov [sbox_ptr],r8
     mov [mul2_table_ptr],r9
-    push rbx
-    push r12
-    push r13
 
     ;roundkey and encryption in eax and ebx
     mov r12,[roundkeys_ptr]
@@ -36,15 +33,12 @@ er_main:
     fastcall shiftRows, rbx
     fastcall addRoundKey, rbx, r12
 
-    pop r13
-    pop r12
-    pop rbx
     ret
 endp
 
 ;mix columns operation is a column matrix
 ;multiplication
-proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
+proc mixColumns23 uses rbx, data_ptr:QWORD, mul2_table_ptr:QWORD,\
      mul3_table_ptr:QWORD
 
      local current_column:DWORD
@@ -52,7 +46,6 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     mov [data_ptr],rcx
     mov [mul2_table_ptr],rdx
     mov [mul3_table_ptr],r8
-    push rbx
 	
     mov rdx, [data_ptr]
     rept 4{
@@ -130,14 +123,12 @@ proc mixColumns23, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     add rdx, COLUMN_SIZE
     }
 
-    pop rbx
     ret
 
 endp
 
-proc loadRow, data_ptr:QWORD
+proc loadRow uses rsi, data_ptr:QWORD
 
-   push rsi
    mov rsi,rcx ;[data_ptr]
    xor rax,rax
 
@@ -152,14 +143,12 @@ proc loadRow, data_ptr:QWORD
    add rsi,3
    lodsb
 
-   pop rsi
    ret
 
 endp
 
-proc storeRow, row:QWORD, data_ptr:QWORD
+proc storeRow uses rdi, row:QWORD, data_ptr:QWORD
 
-   push rdi
    mov rdi,rdx ;[data_ptr]
    mov eax,ecx ;[row]
    rol eax,8
@@ -175,14 +164,12 @@ proc storeRow, row:QWORD, data_ptr:QWORD
    add rdi,3
    stosb
 
-   pop rdi
    ret
 
 endp
 
-proc shiftRows, data_ptr:DWORD
+proc shiftRows uses rbx, data_ptr:DWORD
 
-    push rbx
     mov rbx,rcx ;[data_ptr]
 
     inc rbx
@@ -198,7 +185,6 @@ proc shiftRows, data_ptr:DWORD
     rol eax, 24
     fastcall storeRow, rax, rbx
 
-    pop rbx
     ret
 
 endp
@@ -220,8 +206,7 @@ proc addRoundKey data_ptr:QWORD, round_key_ptr:QWORD
 endp
 
 ;substitute aes block with s-box
-proc subBlockBytes data_ptr:QWORD, sbox_ptr:QWORD
-    push rbx
+proc subBlockBytes uses rbx, data_ptr:QWORD, sbox_ptr:QWORD
 
     mov rbx,rdx ;sbox
     rept 2{
@@ -246,7 +231,6 @@ proc subBlockBytes data_ptr:QWORD, sbox_ptr:QWORD
 	 add rcx,COLUMN_SIZE*2
     }
 
-    pop rbx
     ret
 
 endp
