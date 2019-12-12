@@ -10,10 +10,10 @@
 # AES Implementation for Flat Assembler                                       #
 #                                                                             #
 # VERSION                                                                     #
-# 1.3                                                                         #
+# 1.4                                                                         #
 #                                                                             #
 # DATE                                                                        #
-# 11.011.2019                                                                 #
+# 12.12.2019                                                                  #
 #                                                                             #
 # AUTHOR                                                                      #
 # belial - http://www.nullsecurity.net/                                       #
@@ -50,12 +50,13 @@
 #                                                                             #
 # TODO                                                                        #
 # - Not yet tested against the complete set of AES test vectors               #
-# - AES matrizes are encoded atm column-wise and not row-wise                 #
 # - different block cypher modes are missing                                  #
-# - sbox, rcon and galois look-up tables are atm generated in a very slow     #
-#   and ugly way ;)                                                           #
 #                                                                             #
 # CHANGELOG:                                                                  #
+#                                                                             #
+# v1.4:                                                                       #
+# - removed macros to decrease size by 7kb                                    #
+# - changed sbox, galois lookup table and rcon generation                     #
 #                                                                             #
 # v1.3:                                                                       #
 # - fixed bug: little/big endian byte order                                   #
