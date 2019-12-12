@@ -38,7 +38,7 @@ endp
 
 ;mix columns operation is a column matrix
 ;multiplication
-proc mixColumns23 uses rbx, data_ptr:QWORD, mul2_table_ptr:QWORD,\
+proc mixColumns23 uses rbx r12, data_ptr:QWORD, mul2_table_ptr:QWORD,\
      mul3_table_ptr:QWORD
 
      local current_column:DWORD
@@ -48,7 +48,9 @@ proc mixColumns23 uses rbx, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     mov [mul3_table_ptr],r8
 	
     mov rdx, [data_ptr]
-    rept 4{
+    mov r12,4
+
+mixColumns23_loop:
     ;element 3
     mov eax, [rdx]
     bswap eax
@@ -121,7 +123,9 @@ proc mixColumns23 uses rbx, data_ptr:QWORD, mul2_table_ptr:QWORD,\
     bswap eax
     mov [rdx], eax
     add rdx, COLUMN_SIZE
-    }
+
+    dec r12
+    jnz mixColumns23_loop
 
     ret
 
@@ -206,30 +210,34 @@ proc addRoundKey data_ptr:QWORD, round_key_ptr:QWORD
 endp
 
 ;substitute aes block with s-box
-proc subBlockBytes uses rbx, data_ptr:QWORD, sbox_ptr:QWORD
+proc subBlockBytes uses rbx r12, data_ptr:QWORD, sbox_ptr:QWORD
 
     mov rbx,rdx ;sbox
-    rept 2{
-	 mov rax,[rcx] ;data_ptr
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 xlatb
-	 ror rax, 8
-	 mov [rcx], rax
-	 add rcx,COLUMN_SIZE*2
-    }
+    mov r12,2
+
+subBlockBytes_loop:
+    mov rax,[rcx] ;data_ptr
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    xlatb
+    ror rax, 8
+    mov [rcx], rax
+    add rcx,COLUMN_SIZE*2
+
+    dec r12
+    jnz subBlockBytes_loop
 
     ret
 

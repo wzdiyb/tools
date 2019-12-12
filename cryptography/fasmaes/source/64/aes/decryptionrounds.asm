@@ -38,7 +38,7 @@ endp
 
 ;mix columns operation is a column matrix
 ;multiplication
-proc mixColumns9111314 uses rbx, data_ptr:QWORD, mul9_table_ptr:QWORD,\
+proc mixColumns9111314 uses r12 rbx, data_ptr:QWORD, mul9_table_ptr:QWORD,\
      mul11_table_ptr:QWORD, mul13_table_ptr:QWORD, mul14_table_ptr:QWORD
 
      local current_column:DWORD
@@ -49,7 +49,9 @@ proc mixColumns9111314 uses rbx, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     mov [mul13_table_ptr], r9
 
     mov rdx, [data_ptr]
-    rept 4{
+    mov r12,4
+
+mixColumns9111314_loop:
     ;element 3
     mov eax, [rdx]
     bswap eax
@@ -138,7 +140,9 @@ proc mixColumns9111314 uses rbx, data_ptr:QWORD, mul9_table_ptr:QWORD,\
     bswap eax
     mov [rdx], eax
     add rdx, COLUMN_SIZE
-    }
+
+    dec r12
+    jnz mixColumns9111314_loop
 
     ret
 endp
