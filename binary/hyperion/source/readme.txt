@@ -36,7 +36,7 @@
 # - Support late Binding of DLLs/APIs                                         #
 # - AV evasion (obfuscate sbox, strings, reduce entropy, etc.)                #
 # - Polymorphic generation of the container                                   #
-# - Add .NET Support                                                          #
+# - Add .NET Support or at least warn users                                   #
 # - Preserve Icon and GUI/Console Flag                                        #
 # - Check for correct DLL Version Numbers before Loading                      #
 # - 64 bit asm code cleanup (container and aes payload)                       #

@@ -1,14 +1,11 @@
 ;creates the round keys in keychain_ptr
 if defined AES128
-proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
+proc createKeyChain uses r12 r13 r14 r15 rbx, keychain_ptr:QWORD, sbox_ptr:QWORD,\
 		    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx
      mov [rcon_ptr],r8
-     push r12
-     push r13
-     push rbx
 
      mov r12, ROW_SIZE-1 ;rcx
      mov r13, 1 	 ;rdx
@@ -27,10 +24,9 @@ key_schedule_round:
      inc r13
      ;xor with column at index-ROW_SIZE-1
      mov rbx,rax
-     push r12
-     sub r12,ROW_SIZE-1
-     fastcall loadColumn, [keychain_ptr],r12
-     pop r12
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr],r14
      xor rax,rbx
      ;store at index+1
      inc r12
@@ -40,40 +36,35 @@ key_schedule_round:
      ;-------------------
      ;three times: get current column and
      ;xor it with ecx-ROW_SIZE-1
-     rept 3{
-	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-	  mov rbx, rax
-	  push r12
-	  sub r12,ROW_SIZE-1
-	  fastcall loadColumn, [keychain_ptr],r12
-	  pop r12
-	  xor rax,rbx
-	  inc r12
-	  fastcall storeColumn, rax, [keychain_ptr], r12
-     }
+     mov r15,3
+createKeyChain_loop:
+     fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+     mov rbx, rax
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr], r14
+     xor rax,rbx
+     inc r12
+     fastcall storeColumn, rax, [keychain_ptr], r12
+     dec r15
+     jnz createKeyChain_loop
      ;-------------------
 
      ;check for end of keychain generation
      cmp r12, EXTENDED_KEY_SIZE/COLUMN_SIZE - 1
      jne key_schedule_round
 
-     pop rbx
-     pop r13
-     pop r12
      ret
 endp
 end if
 
 if defined AES192
-proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
+proc createKeyChain uses r12 r13 r14 r15 rbx, keychain_ptr:QWORD, sbox_ptr:QWORD,\
 		    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx
      mov [rcon_ptr],r8
-     push r12
-     push r13
-     push rbx
 
      mov r12, ROW_SIZE-1 ;rcx
      mov r13, 1 	 ;rdx
@@ -92,10 +83,9 @@ key_schedule_round:
      inc r13
      ;xor with column at index-ROW_SIZE-1
      mov rbx,rax
-     push r12
-     sub r12,ROW_SIZE-1
-     fastcall loadColumn, [keychain_ptr],r12
-     pop r12
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr], r14
      xor rax,rbx
      ;store at index+1
      inc r12
@@ -105,17 +95,18 @@ key_schedule_round:
      ;-------------------
      ;three times: get current column and
      ;xor it with ecx-ROW_SIZE-1
-     rept 3{
-	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-	  mov rbx, rax
-	  push r12
-	  sub r12,ROW_SIZE-1
-	  fastcall loadColumn, [keychain_ptr],r12
-	  pop r12
-	  xor rax,rbx
-	  inc r12
-	  fastcall storeColumn, rax, [keychain_ptr], r12
-     }
+     mov r15,3
+createKeyChain_loop:
+     fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+     mov rbx, rax
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr], r14
+     xor rax,rbx
+     inc r12
+     fastcall storeColumn, rax, [keychain_ptr], r12
+     dec r15
+     jnz createKeyChain_loop
      ;-------------------
 
      ;check for end of keychain generation
@@ -125,39 +116,34 @@ key_schedule_round:
      ;-------------------
      ;two times: get current column and
      ;xor it with ecx-ROW_SIZE-1
-     rept 2{
-	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-	  mov rbx, rax
-	  push r12
-	  sub r12,ROW_SIZE-1
-	  fastcall loadColumn, [keychain_ptr],r12
-	  pop r12
-	  xor rax,rbx
-	  inc r12
-	  fastcall storeColumn, rax, [keychain_ptr], r12
-     }
+     mov r15,2
+createKeyChain_loop2:
+     fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+     mov rbx, rax
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr], r14
+     xor rax,rbx
+     inc r12
+     fastcall storeColumn, rax, [keychain_ptr], r12
+     dec r15
+     jnz createKeyChain_loop2
      ;-------------------
 
      jmp key_schedule_round
 
 exit_key_schedule_round:
-     pop rbx
-     pop r13
-     pop r12
      ret
 endp
 end if
 
 if defined AES256
-proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
+proc createKeyChain uses r12 r13 r14 r15 rbx, keychain_ptr:QWORD, sbox_ptr:QWORD,\
 		    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx
      mov [rcon_ptr],r8
-     push r12
-     push r13
-     push rbx
 
      mov r12, ROW_SIZE-1 ;rcx
      mov r13, 1 	 ;rdx
@@ -176,10 +162,9 @@ key_schedule_round:
      inc r13
      ;xor with column at index-ROW_SIZE-1
      mov rbx,rax
-     push r12
-     sub r12,ROW_SIZE-1
-     fastcall loadColumn, [keychain_ptr],r12
-     pop r12
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr], r14
      xor rax,rbx
      ;store at index+1
      inc r12
@@ -189,17 +174,18 @@ key_schedule_round:
      ;-------------------
      ;three times: get current column and
      ;xor it with ecx-ROW_SIZE-1
-     rept 3{
-	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-	  mov rbx, rax
-	  push r12
-	  sub r12,ROW_SIZE-1
-	  fastcall loadColumn, [keychain_ptr],r12
-	  pop r12
-	  xor rax,rbx
-	  inc r12
-	  fastcall storeColumn, rax, [keychain_ptr], r12
-     }
+     mov r15,3
+createKeyChain_loop:
+     fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+     mov rbx, rax
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr], r14
+     xor rax,rbx
+     inc r12
+     fastcall storeColumn, rax, [keychain_ptr], r12
+     dec r15
+     jnz createKeyChain_loop
      ;-------------------
 
      ;check for end of keychain generation
@@ -214,33 +200,31 @@ key_schedule_round:
      fastcall loadColumn, [keychain_ptr], r12 ;can be removed
      fastcall subBytes, rax, [sbox_ptr]
      mov rbx, rax
-     push r12
-     sub r12,ROW_SIZE-1
-     fastcall loadColumn, [keychain_ptr],r12
-     pop r12
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr],r14
      xor rax,rbx
      inc r12
      fastcall storeColumn, rax, [keychain_ptr], r12
+
      ;three times
-     rept 3{
-	  fastcall loadColumn, [keychain_ptr], r12 ;can be removed
-	  mov rbx, rax
-	  push r12
-	  sub r12,ROW_SIZE-1
-	  fastcall loadColumn, [keychain_ptr],r12
-	  pop r12
-	  xor rax,rbx
-	  inc r12
-	  fastcall storeColumn, rax, [keychain_ptr], r12
-     }
+     mov r15,3
+createKeyChain_loop2:
+     fastcall loadColumn, [keychain_ptr], r12 ;can be removed
+     mov rbx, rax
+     mov r14,r12
+     sub r14,ROW_SIZE-1
+     fastcall loadColumn, [keychain_ptr],r14
+     xor rax,rbx
+     inc r12
+     fastcall storeColumn, rax, [keychain_ptr], r12
+     dec r15
+     jnz createKeyChain_loop2
      ;-------------------
 
      jmp key_schedule_round
 
 exit_key_schedule_round:
-     pop rbx
-     pop r13
-     pop r12
      ret
 endp
 end if
@@ -265,14 +249,12 @@ proc storeColumn column:QWORD, keychain_ptr:QWORD, column_index:QWORD
 endp
 
 ;xor key dword with (rcon(index) 00 00 00)
-proc xorRcon key:QWORD, rcon_ptr:QWORD, rcon_index:QWORD
-     push rbx
+proc xorRcon uses rbx, key:QWORD, rcon_ptr:QWORD, rcon_index:QWORD
      mov rax,r8 ; [rcon_index]
      mov rbx,rdx; [rcon_ptr]
      xlatb
      shl rax,24
      xor eax,ecx ;[key]
-     pop rbx
      ret
 endp
 
@@ -290,8 +272,7 @@ proc loadColumn keychain_ptr:QWORD, column_index:QWORD
 endp
 
 ;substitute subkey's bytes with the sbox
-proc subBytes subkey:QWORD, sbox_ptr:QWORD
-     push rbx
+proc subBytes uses rbx, subkey:QWORD, sbox_ptr:QWORD
      mov rax,rcx ;[subkey]
      mov rbx,rdx ;[sbox_ptr]
      xlatb
@@ -302,6 +283,5 @@ proc subBytes subkey:QWORD, sbox_ptr:QWORD
      ror eax, 8
      xlatb
      ror eax, 8
-     pop rbx
      ret
 endp

@@ -6,8 +6,8 @@ include 'decryptionrounds.asm'
 include 'galois.asm'
 
 ;encrypts cleartext and stores the result at enctext
-proc encAES size:QWORD, cleartext_ptr:QWORD, enctext_ptr:QWORD,\
-     aeskey_ptr:QWORD
+proc encAES uses rbx rsi rdi,\
+     size:QWORD, cleartext_ptr:QWORD, enctext_ptr:QWORD, aeskey_ptr:QWORD
 
 local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
       rcon[RCON_SIZE]:BYTE, galois_mul2[GALOIS_SIZE]:BYTE,\
@@ -19,10 +19,6 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
     mov [cleartext_ptr],rdx
     mov [enctext_ptr],r8
     mov [aeskey_ptr],r9
-
-    push rbx
-    push rsi
-    push rdi
 	
     ;sbox and rcon are created in memory
     ;galois lookup tables too
@@ -68,17 +64,14 @@ eaes_block_loop:
     cmp rsi,rbx
     jnge eaes_block_loop
 
-    pop rdi
-    pop rsi
-    pop rbx
     mov rax,1
     ret
 
 endp
 
 ;decrypts cleartext and stores the result at enctext
-proc decAES size:QWORD, enctext_ptr:QWORD, cleartext_ptr:QWORD,\
-     aeskey_ptr:QWORD
+proc decAES uses rbx rsi rdi,\
+     size:QWORD, enctext_ptr:QWORD, cleartext_ptr:QWORD, aeskey_ptr:QWORD
 
 local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
       sbox[SBOX_SIZE]:BYTE, invert_sbox[SBOX_SIZE]:BYTE,\
@@ -93,9 +86,6 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE,\
     mov [enctext_ptr],rdx
     mov [cleartext_ptr],r8
     mov [aeskey_ptr],r9
-    push rbx
-    push rsi
-    push rdi
 	
     ;sbox, invert sbox
     ;and rcon are created in memory
@@ -153,9 +143,6 @@ daes_block_loop:
     cmp rsi,rbx
     jnge daes_block_loop
 
-    pop rdi
-    pop rsi
-    pop rbx
     mov rax,1
     ret
 
