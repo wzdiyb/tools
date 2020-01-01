@@ -64,16 +64,12 @@ le_exit_error:
 endp
 
 ;load the APIs in the import table
-proc loadImportTable, APITable:QWORD, image_base:QWORD
+proc loadImportTable uses rsi rdi rbx, APITable:QWORD, image_base:QWORD
 
 local str1[256]:BYTE, import_table:QWORD, null_directory_entry[sizeof.IMAGE_IMPORT_DESCRIPTOR]:BYTE
 
 	mov [APITable], rcx
 	mov [image_base], rdx
-	push rsi
-	push rdi
-	push rbx
-	sub rsp,8
 
 	;find import table in data directory
 	mov eax,[rdx+IMAGE_DOS_HEADER.e_lfanew]
@@ -128,24 +124,18 @@ pit_exit_error:
 	sub rax,rax
 
 pit_exit_ret:
-	add rsp,8
-	pop rbx
-	pop rdi
-	pop rsi
 	ret
 
 endp
 
 ;loads the APIs
-proc loadImportDirectoryTable, APITable:QWORD, image_base:QWORD, directory_entry:QWORD
+proc loadImportDirectoryTable uses rbx r12, APITable:QWORD, image_base:QWORD, directory_entry:QWORD
 
 local str1[256]:BYTE, lookup_table:QWORD, import_address_table:QWORD, dll_image_base:QWORD
 
 	mov [APITable],rcx
 	mov [image_base],rdx
 	mov [directory_entry],r8
-	push rbx
-	push r12
 
 	;write info about data directory table to logfile
 	writeNewLineToLog APITable
@@ -258,14 +248,12 @@ lidt_exit_error:
 	sub rax,rax
 
 lidt_exit_ret:
-	pop r12
-	pop rbx
 	ret
 
 endp;
 
 ;sets the memory permissions for each section
-proc setPermissions, APITable:QWORD, image_file_header:QWORD, file_image_base:QWORD, \
+proc setPermissions uses rbx r12, APITable:QWORD, image_file_header:QWORD, file_image_base:QWORD, \
 file_image_size:QWORD
 
 local number_of_sections:QWORD, image_base:QWORD, section_headers:QWORD,\
@@ -275,8 +263,6 @@ pe_header_size:QWORD, str1[256]:BYTE, vprotect_ret:QWORD
 	mov [image_file_header],rdx
 	mov [file_image_base],r8
 	mov [file_image_size],r9
-	push rbx
-	push r12
 
 	;find section header
 	sub rax,rax
@@ -334,15 +320,13 @@ sp_exit_error:
 	sub rax,rax
 
 sp_exit_ret:
-	pop r12
-	pop rbx
 	ret
 
 endp;
 
 ;sets the complete image of the decrypted file writeable so
 ;we can copy pe header and sections into it
-proc loadFile, APITable:QWORD, image_file_header:QWORD, file_image_base:QWORD, \
+proc loadFile uses rbx rdi rsi, APITable:QWORD, image_file_header:QWORD, file_image_base:QWORD, \
 file_image_size:QWORD
 
 local number_of_sections:QWORD, image_base:QWORD, aux:QWORD,\
@@ -352,10 +336,6 @@ str1[256]:BYTE, vprotect_ret:QWORD, section_headers:QWORD, pe_header_size:QWORD
 	mov [image_file_header],rdx
 	mov [file_image_base],r8
 	mov [file_image_size],r9
-	push rbx
-	push rdi
-	push rsi
-	sub rsp,8 ;proper 16 byte stack alignment
 
 	;find section header
 	;mov edx,[image_file_header]
@@ -425,15 +405,11 @@ lf_exit_error:
 	sub rax,rax
 
 lf_exit_ret:
-	add rsp,8
-	pop rsi
-	pop rdi
-	pop rbx
 	ret
 endp
 
 ;load the corresponding section into memory
-proc loadSection, APITable:QWORD, section_header:QWORD, image_base:QWORD,\
+proc loadSection uses rdi rsi r12, APITable:QWORD, section_header:QWORD, image_base:QWORD,\
 file_image_base:QWORD
 
 local str1[256]:BYTE
@@ -442,8 +418,6 @@ local str1[256]:BYTE
 	mov [section_header],rdx
 	mov [image_base],r8
 	mov [file_image_base],r9
-	push rdi
-	push rsi
 
 	;copy from file into memory
 	mov rdx,[section_header]
@@ -465,9 +439,9 @@ local str1[256]:BYTE
 	mov rdx,[section_header]
 	lea rsi,[rdx+IMAGE_SECTION_HEADER._Name]
 	mov rcx,8
-	push rdi
+	mov r12, rdi
 	rep movsb
-	pop rdi
+	mov rdi, r12
 	writeLog APITable, rdi
 	writeNewLineToLog APITable
 	mov rdx,[section_header]
@@ -483,14 +457,12 @@ ls_exit_error:
 	sub rax,rax
 
 ls_exit_ret:
-	pop rsi
-	pop rdi
 	ret
 
 endp
 
 ;set the memory page permission for the corresponding section
-proc setSection, APITable:QWORD, section_header:QWORD, image_base:QWORD,\
+proc setSection uses rbx r12, APITable:QWORD, section_header:QWORD, image_base:QWORD,\
 file_image_base:QWORD
 
 local section_flags:QWORD, vprotect_ret:QWORD, str1[256]:BYTE
@@ -499,8 +471,6 @@ local section_flags:QWORD, vprotect_ret:QWORD, str1[256]:BYTE
 	mov [section_header],rdx
 	mov [image_base],r8
 	mov [file_image_base],r9
-	push rbx
-	push r12
 
 	;section execute/read/write?
 	mov ebx,[rdx+IMAGE_SECTION_HEADER.Characteristics]
@@ -566,8 +536,6 @@ ssn_exit_error:
 	sub rax,rax
 
 ssn_exit_ret:
-	pop r12
-	pop rbx
 	ret
 
 endp;
@@ -576,6 +544,7 @@ endp;
 proc verifyPE, image_base:QWORD
 
 	mov [image_base], rcx
+
 	mov ax,[rcx+IMAGE_DOS_HEADER.e_magic]
 	cmp ax,IMAGE_DOS_SIGNATURE
 	jne vpe_exit_error
@@ -599,12 +568,10 @@ endp
 ;First 4 bytes of data seciton contain a checksum
 ;Verify that the checksum is correct
 ;TODO: CHECKSUM SIZE is atm hardcoded
-proc verifyChecksum, section_address:QWORD, section_size:QWORD
+proc verifyChecksum uses rbx rdi, section_address:QWORD, section_size:QWORD
 
 	mov [section_address],rcx
 	mov [section_size],rdx
-	push rbx
-	push rdi
 
 	mov rbx,[section_address]
 	mov eax,[rbx]
@@ -634,8 +601,6 @@ vs_exit_error:
 	sub eax,eax
 
 vs_exit_ret:
-	pop rdi
-	pop rbx
 	ret
 
 endp
