@@ -1,12 +1,11 @@
 ;Loads the exe which is stored in input_image
 ;into memory and starts its execution
-proc loadExecutable APITable:QWORD, input_image:QWORD
+proc loadExecutable input_image:QWORD
 
 local str1[256]:BYTE, ret_val:QWORD, image_file_header:QWORD,\
 loaded_file:QWORD
 
-	mov [APITable],rcx
-	mov [input_image],rdx
+	mov [input_image],rcx
 
 	;verify checksum of packed executable
 	writeWithNewLine createStringVerifyChecksum, str1, le_exit_error
@@ -24,32 +23,30 @@ loaded_file:QWORD
 	jz le_exit_error
 
 	;copy pe header and sections into memory
-	writeNewLineToLog APITable
+	writeNewLineToLog
 	writeWithNewLine createStringMappingFileInMemory, str1, le_exit_error
 	mov rax,[input_image]
 	add rax,4
 	mov rcx,INFILE_SIZE
 	sub rcx,4
-	fastcall loadFile, [APITable], [image_file_header], rax, rcx
+	fastcall loadFile, [image_file_header], rax, rcx
 	test rax,rax
 	mov [loaded_file],rax
 	jz le_exit_error
 
 	;loading import table
-	writeNewLineToLog APITable
+	writeNewLineToLog
 	writeWithNewLine createStringLoadingFilesAPIs, str1, le_exit_error
-	fastcall loadImportTable, [APITable], [loaded_file]
+	fastcall loadImportTable, [loaded_file]
 	test rax,rax
 	jz le_exit_error
 
 	;set the correct permissions for each section
-	writeNewLineToLog APITable
+	writeNewLineToLog
 	writeWithNewLine createStringSettingPermissions, str1, le_exit_error
 	mov rax,[input_image]
 	add rax,4
-	mov rcx,INFILE_SIZE
-	sub rcx,4
-	fastcall setPermissions, [APITable], [image_file_header], rax, rcx
+	fastcall setPermissions, [image_file_header], rax, INFILE_SIZE-4
 	test rax,rax
 	jz le_exit_error
 
@@ -64,14 +61,14 @@ le_exit_error:
 endp
 
 ;load the APIs in the import table
-proc loadImportTable uses rsi rdi rbx, APITable:QWORD, image_base:QWORD
+proc loadImportTable uses rsi rdi rbx, image_base:QWORD
 
 local str1[256]:BYTE, import_table:QWORD, null_directory_entry[sizeof.IMAGE_IMPORT_DESCRIPTOR]:BYTE
 
-	mov [APITable], rcx
-	mov [image_base], rdx
+	mov [image_base], rcx
 
 	;find import table in data directory
+	mov rdx,[image_base]
 	mov eax,[rdx+IMAGE_DOS_HEADER.e_lfanew]
 	add rax,rdx
 	add rax,4
@@ -86,7 +83,7 @@ local str1[256]:BYTE, import_table:QWORD, null_directory_entry[sizeof.IMAGE_IMPO
 	;pointer to import table now in eax
 	mov [import_table],rax
 	writeWithNewLine createStringFoundImportTable, str1, le_exit_error
-	writeRegisterToLog APITable, [import_table]
+	writeRegisterToLog [import_table]
 	test rax,rax
 	jz pit_exit_error
 
@@ -109,7 +106,7 @@ pit_next_directory_entry:
 	rep cmpsb
 	je pit_exit_success
 	;load APIs of this directory
-	fastcall loadImportDirectoryTable, [APITable], [image_base], rbx
+	fastcall loadImportDirectoryTable, [image_base], rbx
 	test rax,rax
 	jz pit_exit_error
 	;next entry
@@ -129,16 +126,15 @@ pit_exit_ret:
 endp
 
 ;loads the APIs
-proc loadImportDirectoryTable uses rbx r12, APITable:QWORD, image_base:QWORD, directory_entry:QWORD
+proc loadImportDirectoryTable uses rbx r12, image_base:QWORD, directory_entry:QWORD
 
 local str1[256]:BYTE, lookup_table:QWORD, import_address_table:QWORD, dll_image_base:QWORD
 
-	mov [APITable],rcx
-	mov [image_base],rdx
-	mov [directory_entry],r8
+	mov [image_base],rcx
+	mov [directory_entry],rdx
 
 	;write info about data directory table to logfile
-	writeNewLineToLog APITable
+	writeNewLineToLog
 	test rax,rax
 	jz lidt_exit_error
 	writeWithNewLine createStringProcessImportDirectory, str1, lidt_exit_error
@@ -147,10 +143,10 @@ local str1[256]:BYTE, lookup_table:QWORD, import_address_table:QWORD, dll_image_
 	add rax,[image_base]
 	mov rbx,rax
 	;pointer to dll name in ebx
-	writeLog APITable, rax
+	writeLog rax
 	test rax,rax
 	jz lidt_exit_error
-	writeNewLineToLog APITable
+	writeNewLineToLog
 	test rax,rax
 	jz lidt_exit_error
 
@@ -193,16 +189,16 @@ lidt_next_lookup_entry:
 lidt_byname:
 	createStringName str1
 	lea rax,[str1]
-	writeLog APITable, rax
+	writeLog rax
 	test rax,rax
 	jz lidt_exit_error
 	add rbx,[image_base] ;according to spec, first 32 bits are 0, therefore add is possible
 	lea rbx,[rbx+IMAGE_IMPORT_BY_NAME.Name_]
 	mov rax,rbx ;pointer to API name is now in rax and rbx
-	writeLog APITable, rax
+	writeLog rax
 	test rax,rax
 	jz lidt_exit_error
-	writeNewLineToLog APITable
+	writeNewLineToLog
 	test rax,rax
 	jz lidt_exit_error
 	;API name pointer in rbx
@@ -219,14 +215,14 @@ lidt_byname:
 lidt_byordinal:
 	createStringOrdinal str1
 	lea rax,[str1]
-	writeLog APITable, rax
+	writeLog rax
 	test rax,rax
 	jz lidt_exit_error
 	;remove the ordinal flag
 	mov rcx,IMAGE_ORDINAL_FLAG64
 	xor rbx,rcx
 	mov rax,rbx
-	writeRegisterToLog APITable, rax
+	writeRegisterToLog rax
 	test rax,rax
 	jz pit_exit_error
 	;API ordinal in rbx
@@ -253,19 +249,19 @@ lidt_exit_ret:
 endp;
 
 ;sets the memory permissions for each section
-proc setPermissions uses rbx r12, APITable:QWORD, image_file_header:QWORD, file_image_base:QWORD, \
+proc setPermissions uses rbx r12, image_file_header:QWORD, file_image_base:QWORD, \
 file_image_size:QWORD
 
 local number_of_sections:QWORD, image_base:QWORD, section_headers:QWORD,\
 pe_header_size:QWORD, str1[256]:BYTE, vprotect_ret:QWORD
 
-	mov [APITable],rcx
-	mov [image_file_header],rdx
-	mov [file_image_base],r8
-	mov [file_image_size],r9
+	mov [image_file_header],rcx
+	mov [file_image_base],rdx
+	mov [file_image_size],r8
 
 	;find section header
 	sub rax,rax
+	mov rdx,[image_file_header]
 	mov ax,[rdx+IMAGE_FILE_HEADER.NumberOfSections]
 	mov [number_of_sections],rax
 	add rdx,sizeof.IMAGE_FILE_HEADER
@@ -290,14 +286,13 @@ pe_header_size:QWORD, str1[256]:BYTE, vprotect_ret:QWORD
 	mov [pe_header_size],rax
 
 	;set pe header page read-only
-	mov rax,[APITable]
 	lea r12,[vprotect_ret]
-	fastcall qword [rax+VirtualProtect], [image_base], [pe_header_size], PAGE_READONLY, r12
+	invoke VirtualProtect, [image_base], [pe_header_size], PAGE_READONLY, r12
 	test rax,rax
 	jz sp_exit_error
 
 	;some output for the user
-	writeRegisterToLog APITable, [image_base]
+	writeRegisterToLog [image_base]
 	test rax,rax
 	jz sp_exit_error
 
@@ -305,7 +300,7 @@ pe_header_size:QWORD, str1[256]:BYTE, vprotect_ret:QWORD
 	mov r12,[number_of_sections]
 	mov rbx,[section_headers]
 sp_load_section_loop:
-	fastcall setSection, [APITable], rbx, [image_base], [file_image_base]
+	fastcall setSection, rbx, [image_base], [file_image_base]
 	test rax,rax
 	jz sp_exit_error
 	add rbx,sizeof.IMAGE_SECTION_HEADER
@@ -326,20 +321,20 @@ endp;
 
 ;sets the complete image of the decrypted file writeable so
 ;we can copy pe header and sections into it
-proc loadFile uses rbx rdi rsi, APITable:QWORD, image_file_header:QWORD, file_image_base:QWORD, \
+proc loadFile uses rbx rdi rsi, image_file_header:QWORD, file_image_base:QWORD, \
 file_image_size:QWORD
 
 local number_of_sections:QWORD, image_base:QWORD, aux:QWORD,\
 str1[256]:BYTE, vprotect_ret:QWORD, section_headers:QWORD, pe_header_size:QWORD
 
-	mov [APITable],rcx
-	mov [image_file_header],rdx
-	mov [file_image_base],r8
-	mov [file_image_size],r9
+	mov [image_file_header],rcx
+	mov [file_image_base],rdx
+	mov [file_image_size],r8
 
 	;find section header
 	;mov edx,[image_file_header]
 	sub rax,rax
+	mov rdx,[image_file_header]
 	mov ax,[rdx+IMAGE_FILE_HEADER.NumberOfSections]
 	mov [number_of_sections],rax
 	add rdx,sizeof.IMAGE_FILE_HEADER
@@ -349,14 +344,13 @@ str1[256]:BYTE, vprotect_ret:QWORD, section_headers:QWORD, pe_header_size:QWORD
 	mov esi,[rdx+IMAGE_OPTIONAL_HEADER64.SizeOfImage]
 	mov [aux],rdx ;store edx, we need it later
 	lea rbx,[vprotect_ret]
-	mov rax,[APITable]
-	fastcall qword [rax+VirtualProtect], [image_base], rsi, PAGE_READWRITE, rbx
+	invoke VirtualProtect, [image_base], rsi, PAGE_READWRITE, rbx
 	test rax,rax
 	jz lf_exit_error
 
 	;some output for the user
 	writeWithNewLine createStringLoadedPEHeader, str1, lf_exit_error
-	writeRegisterToLog APITable, [image_base]
+	writeRegisterToLog [image_base]
 	test rax,rax
 	jz lf_exit_error
 
@@ -390,7 +384,7 @@ str1[256]:BYTE, vprotect_ret:QWORD, section_headers:QWORD, pe_header_size:QWORD
 	mov rsi,[number_of_sections]
 	mov rbx,[section_headers]
 lf_load_section_loop:
-	fastcall loadSection, [APITable], rbx, [image_base], [file_image_base]
+	fastcall loadSection, rbx, [image_base], [file_image_base]
 	test rax,rax
 	jz lf_exit_error
 	add rbx,sizeof.IMAGE_SECTION_HEADER
@@ -409,15 +403,14 @@ lf_exit_ret:
 endp
 
 ;load the corresponding section into memory
-proc loadSection uses rdi rsi r12, APITable:QWORD, section_header:QWORD, image_base:QWORD,\
+proc loadSection uses rdi rsi r12, section_header:QWORD, image_base:QWORD,\
 file_image_base:QWORD
 
 local str1[256]:BYTE
 
-	mov [APITable],rcx
-	mov [section_header],rdx
-	mov [image_base],r8
-	mov [file_image_base],r9
+	mov [section_header],rcx
+	mov [image_base],rdx
+	mov [file_image_base],r8
 
 	;copy from file into memory
 	mov rdx,[section_header]
@@ -431,7 +424,6 @@ local str1[256]:BYTE
 	;print some infos to the log file
 	createStringLoaded str1
 	lea rax,[str1]
-	writeLog APITable, rax
 	test rax,rax
 	jz ls_exit_error
 	lea rdi,[str1]
@@ -442,12 +434,12 @@ local str1[256]:BYTE
 	mov r12, rdi
 	rep movsb
 	mov rdi, r12
-	writeLog APITable, rdi
-	writeNewLineToLog APITable
+	writeLog rdi
+	writeNewLineToLog
 	mov rdx,[section_header]
 	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
 	add rax,[image_base]
-	writeRegisterToLog APITable, rax
+	writeRegisterToLog rax
 
 ls_exit_success:
 	mov rax,1
@@ -462,17 +454,17 @@ ls_exit_ret:
 endp
 
 ;set the memory page permission for the corresponding section
-proc setSection uses rbx r12, APITable:QWORD, section_header:QWORD, image_base:QWORD,\
+proc setSection uses rbx r12, section_header:QWORD, image_base:QWORD,\
 file_image_base:QWORD
 
 local section_flags:QWORD, vprotect_ret:QWORD, str1[256]:BYTE
 
-	mov [APITable],rcx
-	mov [section_header],rdx
-	mov [image_base],r8
-	mov [file_image_base],r9
+	mov [section_header],rcx
+	mov [image_base],rdx
+	mov [file_image_base],r8
 
 	;section execute/read/write?
+	mov rdx,[section_header]
 	mov ebx,[rdx+IMAGE_SECTION_HEADER.Characteristics]
 	and ebx,IMAGE_SCN_MEM_EXECUTE or IMAGE_SCN_MEM_READ or IMAGE_SCN_MEM_WRITE
 	cmp ebx,IMAGE_SCN_MEM_EXECUTE or IMAGE_SCN_MEM_READ or IMAGE_SCN_MEM_WRITE
@@ -516,9 +508,8 @@ ssn_set_memory:
 	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
 	add rax,[image_base]
 	mov ebx,[rdx+IMAGE_SECTION_HEADER.VirtualSize]
-	mov r10,[APITable]
 	lea r12,[vprotect_ret]
-	fastcall qword [r10+VirtualProtect],rax,rbx,[section_flags], r12
+	invoke VirtualProtect,rax,rbx,[section_flags], r12
 	test rax,rax
 	jz ssn_exit_error
 
@@ -526,7 +517,7 @@ ssn_set_memory:
 	mov rdx,[section_header]
 	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
 	add rax,[image_base]
-	writeRegisterToLog APITable, rax
+	writeRegisterToLog rax
 
 ssn_exit_success:
 	mov rax,1
@@ -545,6 +536,7 @@ proc verifyPE, image_base:QWORD
 
 	mov [image_base], rcx
 
+	mov rcx,[image_base]
 	mov ax,[rcx+IMAGE_DOS_HEADER.e_magic]
 	cmp ax,IMAGE_DOS_SIGNATURE
 	jne vpe_exit_error

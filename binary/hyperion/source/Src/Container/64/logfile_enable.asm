@@ -11,32 +11,32 @@
 macro writeWithNewLine char_sequence, char_buffer, error_exit{
 	char_sequence char_buffer
 	lea rax,[str1]
-	fastcall writeLog_,[APITable],rax
+	fastcall writeLog_, rax
 	test rax,rax
 	jz error_exit
-	fastcall writeNewLineToLog_,[APITable]
+	fastcall writeNewLineToLog_
 	test rax,rax
 	jz error_exit
 }
 
 ;write a string to the logfile
-macro writeLog apitable, content{
-	fastcall writeLog_,[apitable], content
+macro writeLog content{
+	fastcall writeLog_, content
 }
 
 ;delete old log file and create a new one
-macro initLogFile apitable{
-	fastcall initLogFile_, [apitable]
+macro initLogFile{
+	fastcall initLogFile_
 }
 
 ;write a newline into logfile
-macro writeNewLineToLog apitable{
-	fastcall writeNewLineToLog_, [apitable]
+macro writeNewLineToLog{
+	fastcall writeNewLineToLog_
 }
 
 ;write a register value into logile
-macro writeRegisterToLog apitable, value{
-	fastcall writeRegisterToLog_, [apitable], value
+macro writeRegisterToLog value{
+	fastcall writeRegisterToLog_, value
 }
 
 ;--- End Macro Section ---
@@ -62,28 +62,25 @@ endp
 
 ;write <content> into log.txt
 ;returns false if an eerror occurs
-proc writeLog_ APITable:QWORD, content:QWORD
+proc writeLog_ content:QWORD
 
 local str1[256]:BYTE, oldlogsize:QWORD, newlogsize:QWORD, contentsize:QWORD,\
       filehandle:QWORD, filemappingobject:QWORD, mapaddress:QWORD, retval:QWORD
 
-	 mov [APITable],rcx
-	 mov [content],rdx
+	 mov [content],rcx
 
 	 ;open file
 	 createStringLogTxt str1
-	 mov rax,[APITable]
 	 lea r10,[str1]
 	 sub r11,r11
-	 fastcall qword [rax+CreateFile], r10, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ, r11, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, r11
+	 invoke CreateFile, r10, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ, r11, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, r11
 	 mov [retval],rax
 	 test rax,rax
 	 jz wl_logexit
 	 mov [filehandle],rax
 
 	 ;get logfile size
-	 mov rax,[APITable]
-	 fastcall qword [rax+GetFileSize], qword [filehandle], 0
+	 invoke GetFileSize, qword [filehandle], 0
 	 mov [oldlogsize],rax
 
 	 ;get size of string for logfile for concatenation
@@ -94,16 +91,14 @@ local str1[256]:BYTE, oldlogsize:QWORD, newlogsize:QWORD, contentsize:QWORD,\
 
 	 ;create the file mapping
 	 sub r10,r10
-	 mov r11,[APITable]
-	 fastcall qword [r11+CreateFileMapping], qword [filehandle], r10, PAGE_READWRITE, r10, rax, r10
+	 invoke CreateFileMapping, qword [filehandle], r10, PAGE_READWRITE, r10, rax, r10
 	 mov [retval],rax
 	 test rax, rax
 	 jz wl_closelogfile
 	 mov [filemappingobject],rax
 
 	 sub r10,r10
-	 mov r11,[APITable]
-	 fastcall qword [r11+MapViewOfFile], rax, FILE_MAP_ALL_ACCESS, r10, r10, qword [newlogsize]
+	 invoke MapViewOfFile, rax, FILE_MAP_ALL_ACCESS, r10, r10, qword [newlogsize]
 	 mov [retval],rax
 	 test rax, rax
 	 jz wl_closemaphandle
@@ -118,16 +113,13 @@ local str1[256]:BYTE, oldlogsize:QWORD, newlogsize:QWORD, contentsize:QWORD,\
 	 mov [retval],1
 
 wl_unmapfile:
-	 mov rax,[APITable]
-	 fastcall qword [rax+UnmapViewOfFile], qword [mapaddress]
+	 invoke UnmapViewOfFile, qword [mapaddress]
 
 wl_closemaphandle:
-	 mov rax,[APITable]
-	 fastcall qword [rax+CloseHandle], qword [filemappingobject]
+	 invoke CloseHandle, qword [filemappingobject]
 
 wl_closelogfile:
-	 mov rax,[APITable]
-	 fastcall qword [rax+CloseHandle], qword [filehandle]
+	 invoke CloseHandle, qword [filehandle]
 
 wl_logexit:
 	 mov rax,[retval]
@@ -137,34 +129,32 @@ endp
 
 ;adds a <newline> to the logfile
 ;returns false if an error occurs
-proc writeNewLineToLog_ APITable:QWORD
+proc writeNewLineToLog_
 
 local str1[3]:BYTE
-	 mov [APITable],rcx
 
 	 lea rax,[str1]
 	 mov byte [rax+0],13
 	 mov byte [rax+1],10
 	 mov byte [rax+2],0
-	 fastcall writeLog_, [APITable], rax
+	 fastcall writeLog_, rax
 	 ret
 
 endp
 
 ;returns false if an error occurs
-proc writeRegisterToLog_ APITable:QWORD, Value:QWORD
+proc writeRegisterToLog_ Value:QWORD
 
 local str1[18]:BYTE, retval:QWORD
-	 mov [APITable],rcx
-	 mov [Value],rdx
+	 mov [Value],rcx
 
 	 lea rax,[str1]
 	 fastcall binToString_, rax, [Value]
-	 fastcall writeLog_,[APITable],rax
+	 fastcall writeLog_, rax
 	 mov [retval],rax
 	 test rax,rax
 	 jz wrtl_exit
-	 fastcall writeNewLineToLog_,[APITable]
+	 fastcall writeNewLineToLog_
 	 mov [retval],rax
 	 test rax,rax
 	 jz wrtl_exit
@@ -208,36 +198,33 @@ bts_finished_conversion:
 endp
 
 ;Write initial message into logfile
-proc initLogFile_ APITable:QWORD
+proc initLogFile_
 
 local str1[256]:BYTE
 
-	mov [APITable], rcx
-
 	createStringLogTxt str1
-	mov rax,[APITable]
 	lea r10,[str1]
-	fastcall qword [rax+DeleteFile],r10
+	invoke DeleteFile, r10
 
 	createStringStartingHyperionLines str1
 	lea r10,[str1]
-	fastcall writeLog_,[APITable],r10
+	fastcall writeLog_, r10
 	test rax,rax
 	jz ilf_exit_error
 
 	createStringStartingHyperion str1
 	lea r10,[str1]
-	fastcall writeLog_,[APITable],r10
+	fastcall writeLog_, r10
 	test rax,rax
 	jz ilf_exit_error
 
 	createStringStartingHyperionLines str1
 	lea r10,[str1]
-	fastcall writeLog_,[APITable],r10
+	fastcall writeLog_, r10
 	test rax,rax
 	jz ilf_exit_error
 
-	fastcall writeNewLineToLog_,[APITable]
+	fastcall writeNewLineToLog_
 	test rax,rax
 	jz ilf_exit_error
 
