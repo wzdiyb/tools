@@ -1,25 +1,110 @@
+macro createStringBruteforcing location
+{
+
+}
+
+macro createStringSettingPermissions location
+{
+
+}
+
+macro createStringOrdinal location
+{
+
+}
+
+macro createStringName location
+{
+
+}
+
+macro createStringProcessImportDirectory location
+{
+
+}
+
+macro createStringFoundImportTable location
+{
+
+}
+
+macro createStringLoadingFilesAPIs location
+{
+
+}
+
+macro createStringMappingFileInMemory location
+{
+
+}
+
+macro createStringLoaded location
+{
+
+}
+
+macro createStringLoadedPEHeader location
+{
+
+}
+
+macro createStringVerifyPE location
+{
+
+}
+
+macro createStringVerifyChecksum location
+{
+
+}
+
+macro createStringDone location
+{
+
+}
+
+macro createStringError location
+{
+
+}
+
+macro createStringStartingHyperion location
+{
+
+}
+
+macro createStringStartingHyperionLines location
+{
+
+}
+
+macro createStringLogTxt location
+{
+
+}
+
 ;writes a string and a newline to the logfile
 macro writeWithNewLine char_sequence, char_buffer, error_exit{
     char_sequence char_buffer
-	mov rax,1
+
 }
 
 ;write a string to the logfile
 macro writeLog apitable, content{
-	mov rax,1
+
 }
 
 ;delete old log file and create a new one
 macro initLogFile apitable{
-	 mov rax,1
+
 }
 
 ;write a newline into logfile
 macro writeNewLineToLog apitable{
-	mov rax,1
+
 }
 
 ;write a register value into logile
 macro writeRegisterToLog apitable, value{
-	mov rax,1
+
 }
