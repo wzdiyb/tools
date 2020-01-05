@@ -180,7 +180,6 @@ lidt_next_lookup_entry:
 	jnz lidt_byordinal
 lidt_byname:
 	createStringName str1
-	lea rax,[str1]
 	writeLog rax, lidt_exit_error
 	add rbx,[image_base] ;according to spec, first 32 bits are 0, therefore add is possible
 	lea rbx,[rbx+IMAGE_IMPORT_BY_NAME.Name_]
@@ -200,7 +199,6 @@ lidt_byname:
 
 lidt_byordinal:
 	createStringOrdinal str1
-	lea rax,[str1]
 	writeLog rax, lidt_exit_error
 	;remove the ordinal flag
 	mov rcx,IMAGE_ORDINAL_FLAG64
@@ -398,26 +396,7 @@ local str1[256]:BYTE
 	add rsi,[file_image_base]
 	mov ecx,[rdx+IMAGE_SECTION_HEADER.SizeOfRawData]
 	rep movsb
-
-	;print some infos to the log file
-	createStringLoaded str1
-	lea rax,[str1]
-	test rax,rax
-	jz ls_exit_error
-	lea rdi,[str1]
-	mov byte [rdi+8],0
-	mov rdx,[section_header]
-	lea rsi,[rdx+IMAGE_SECTION_HEADER._Name]
-	mov rcx,8
-	mov r12, rdi
-	rep movsb
-	mov rdi, r12
-	writeLog rdi, ls_exit_error
-	writeNewLineToLog ls_exit_error
-	mov rdx,[section_header]
-	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
-	add rax,[image_base]
-	writeRegisterToLog rax, ls_exit_error
+	writeSectionNameAndAddressToLog
 
 ls_exit_success:
 	mov rax,1

@@ -86,7 +86,6 @@ proc MainMethod
 main_exitsuccess:
 	 writeNewLineToLog main_exit
 	 createStringDone str1
-	 lea rax,[str1]
 	 writeLog rax, main_exit
 	 mov rax,[RetVal]
 	 jmp main_exit
@@ -95,7 +94,6 @@ main_exitsuccess:
 main_exiterror:
 	 writeNewLineToLog main_exit
 	 createStringError str1
-	 lea rax,[str1]
 	 writeLog rax, main_exit
 	 sub rax,rax
 

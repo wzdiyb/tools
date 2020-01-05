@@ -26,6 +26,7 @@ macro createStringBruteforcing location
 	 mov [location+14],'e'
 	 mov [location+15],'y'
 	 mov [location+16],0
+	 lea rax,[location]
 }
 
 macro createStringSettingPermissions location
@@ -58,6 +59,7 @@ macro createStringSettingPermissions location
 	 mov [location+25],'n'
 	 mov [location+26],'s'
 	 mov [location+27],0
+	 lea rax,[location]
 }
 
 macro createStringOrdinal location
@@ -72,6 +74,7 @@ macro createStringOrdinal location
 	 mov [location+7],':'
 	 mov [location+8],' '
 	 mov [location+9],0
+	 lea rax,[location]
 }
 
 macro createStringName location
@@ -83,6 +86,7 @@ macro createStringName location
 	 mov [location+4],':'
 	 mov [location+5],' '
 	 mov [location+6],0
+	 lea rax,[location]
 }
 
 macro createStringProcessImportDirectory location
@@ -116,6 +120,7 @@ macro createStringProcessImportDirectory location
 	 mov [location+26],'y'
 	 mov [location+27],':'
 	 mov [location+28],0
+	 lea rax,[location]
 }
 
 macro createStringFoundImportTable location
@@ -134,6 +139,7 @@ macro createStringFoundImportTable location
 	 mov [location+11],'e'
 	 mov [location+12],':'
 	 mov [location+13],0
+	 lea rax,[location]
 }
 
 macro createStringLoadingFilesAPIs location
@@ -151,6 +157,7 @@ macro createStringLoadingFilesAPIs location
 	 mov [location+10],'I'
 	 mov [location+11],'s'
 	 mov [location+12],0
+	 lea rax,[location]
 }
 
 macro createStringMappingFileInMemory location
@@ -180,6 +187,7 @@ macro createStringMappingFileInMemory location
 	 mov [location+22],'r'
 	 mov [location+23],'y'
 	 mov [location+24],0
+	 lea rax,[location]
 }
 
 macro createStringLoaded location
@@ -192,6 +200,7 @@ macro createStringLoaded location
 	 mov [location+5],'d'
 	 mov [location+6],' '
 	 mov [location+7],0
+	 lea rax,[location]
 }
 
 macro createStringLoadedPEHeader location
@@ -216,6 +225,7 @@ macro createStringLoadedPEHeader location
 	 mov [location+17],'e'
 	 mov [location+18],':'
 	 mov [location+19],0
+	 lea rax,[location]
 }
 
 macro createStringVerifyPE location
@@ -233,6 +243,7 @@ macro createStringVerifyPE location
 	 mov [location+10],'P'
 	 mov [location+11],'E'
 	 mov [location+12],0
+	 lea rax,[location]
 }
 
 macro createStringVerifyChecksum location
@@ -256,6 +267,7 @@ macro createStringVerifyChecksum location
 	 mov [location+16],'u'
 	 mov [location+17],'m'
 	 mov [location+18],0
+	 lea rax,[location]
 }
 
 macro createStringDone location
@@ -265,6 +277,7 @@ macro createStringDone location
 	 mov [location+2],'n'
 	 mov [location+3],'e'
 	 mov [location+4],0
+	 lea rax,[location]
 }
 
 macro createStringError location
@@ -275,6 +288,7 @@ macro createStringError location
 	 mov [location+3],'o'
 	 mov [location+4],'r'
 	 mov [location+5],0
+	 lea rax,[location]
 }
 
 macro createStringStartingHyperion location
@@ -298,6 +312,7 @@ macro createStringStartingHyperion location
 	 mov [location+16],13
 	 mov [location+17],10
 	 mov [location+18],0
+	 lea rax,[location]
 }
 
 macro createStringStartingHyperionLines location
@@ -321,6 +336,7 @@ macro createStringStartingHyperionLines location
 	 mov [location+16],13
 	 mov [location+17],10
 	 mov [location+18],0
+	 lea rax,[location]
 }
 
 macro createStringLogTxt location
@@ -333,6 +349,7 @@ macro createStringLogTxt location
 	 mov [location+5],'x'
 	 mov [location+6],'t'
 	 mov [location+7],0
+	 lea rax,[location]
 }
 
 ;writes a string and a newline to the logfile
@@ -375,6 +392,24 @@ macro writeRegisterToLog value, error_exit{
 	jz error_exit
 }
 
+;TODO: Does not really fit into architecture
+macro writeSectionNameAndAddressToLog{
+	lea rdi,[str1]
+	mov byte [rdi+8],0
+	mov rdx,[section_header]
+	lea rsi,[rdx+IMAGE_SECTION_HEADER._Name]
+	mov rcx,8
+	mov r12, rdi
+	rep movsb
+	mov rdi, r12
+	writeLog rdi, ls_exit_error
+	writeNewLineToLog ls_exit_error
+	mov rdx,[section_header]
+	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
+	add rax,[image_base]
+	writeRegisterToLog rax, ls_exit_error
+}
+
 ;--- End Macro Section ---
 
 ;get the length of a string
@@ -407,9 +442,8 @@ local str1[256]:BYTE, oldlogsize:QWORD, newlogsize:QWORD, contentsize:QWORD,\
 
 	 ;open file
 	 createStringLogTxt str1
-	 lea r10,[str1]
 	 sub r11,r11
-	 invoke CreateFile, r10, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ, r11, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, r11
+	 invoke CreateFile, rax, GENERIC_READ or GENERIC_WRITE, FILE_SHARE_READ, r11, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, r11
 	 mov [retval],rax
 	 test rax,rax
 	 jz wl_logexit
@@ -539,24 +573,20 @@ proc initLogFile_
 local str1[256]:BYTE
 
 	createStringLogTxt str1
-	lea r10,[str1]
-	invoke DeleteFile, r10
+	invoke DeleteFile, rax
 
 	createStringStartingHyperionLines str1
-	lea r10,[str1]
-	fastcall writeLog_, r10
+	fastcall writeLog_, rax
 	test rax,rax
 	jz ilf_exit_error
 
 	createStringStartingHyperion str1
-	lea r10,[str1]
-	fastcall writeLog_, r10
+	fastcall writeLog_, rax
 	test rax,rax
 	jz ilf_exit_error
 
 	createStringStartingHyperionLines str1
-	lea r10,[str1]
-	fastcall writeLog_, r10
+	fastcall writeLog_, rax
 	test rax,rax
 	jz ilf_exit_error
 

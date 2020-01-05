@@ -108,3 +108,7 @@ macro writeNewLineToLog exit_error{
 macro writeRegisterToLog value, exit_error{
 
 }
+
+macro writeSectionNameAndAddressToLog{
+
+}
