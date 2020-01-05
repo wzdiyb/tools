@@ -54,9 +54,7 @@ proc MainMethod
 	 RetVal:QWORD
 
 	 ;create logfile and write initial message into it
-	 initLogFile
-	 test rax,rax
-	 jz main_exiterrornolog
+	 initLogFile main_exit
 
 	 ;decrypt exe in data section
 	 fastcall decryptExecutable, encrypted_infile
@@ -86,26 +84,22 @@ proc MainMethod
 
 ;finished without errors
 main_exitsuccess:
-	 writeNewLineToLog
+	 writeNewLineToLog main_exit
 	 createStringDone str1
 	 lea rax,[str1]
-	 writeLog rax
+	 writeLog rax, main_exit
 	 mov rax,[RetVal]
 	 jmp main_exit
 
 ;finished with errors after logfile API loading
 main_exiterror:
-	 writeNewLineToLog
+	 writeNewLineToLog main_exit
 	 createStringError str1
 	 lea rax,[str1]
-	 writeLog rax
+	 writeLog rax, main_exit
 	 sub rax,rax
 
 main_exit:
-	 ret
-
-;finished with errors before logfile API loading
-main_exiterrornolog:
 	 ret
 
 endp

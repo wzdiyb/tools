@@ -90,21 +90,21 @@ macro writeWithNewLine char_sequence, char_buffer, error_exit{
 }
 
 ;write a string to the logfile
-macro writeLog apitable, content{
+macro writeLog content, exit_error{
 
 }
 
 ;delete old log file and create a new one
-macro initLogFile apitable{
+macro initLogFile exit_error{
 
 }
 
 ;write a newline into logfile
-macro writeNewLineToLog apitable{
+macro writeNewLineToLog exit_error{
 
 }
 
 ;write a register value into logile
-macro writeRegisterToLog apitable, value{
+macro writeRegisterToLog value, exit_error{
 
 }

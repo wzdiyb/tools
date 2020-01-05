@@ -348,23 +348,31 @@ macro writeWithNewLine char_sequence, char_buffer, error_exit{
 }
 
 ;write a string to the logfile
-macro writeLog content{
+macro writeLog content, error_exit{
 	fastcall writeLog_, content
+	test rax,rax
+	jz error_exit
 }
 
 ;delete old log file and create a new one
-macro initLogFile{
-	fastcall initLogFile_
+macro initLogFile error_exit{
+	fastcall initLogFile_, error_exit
+	test rax,rax
+	jz error_exit
 }
 
 ;write a newline into logfile
-macro writeNewLineToLog{
+macro writeNewLineToLog error_exit{
 	fastcall writeNewLineToLog_
+	test rax,rax
+	jz error_exit
 }
 
 ;write a register value into logile
-macro writeRegisterToLog value{
+macro writeRegisterToLog value, error_exit{
 	fastcall writeRegisterToLog_, value
+	test rax,rax
+	jz error_exit
 }
 
 ;--- End Macro Section ---

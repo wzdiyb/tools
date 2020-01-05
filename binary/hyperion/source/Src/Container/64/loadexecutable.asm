@@ -23,7 +23,7 @@ loaded_file:QWORD
 	jz le_exit_error
 
 	;copy pe header and sections into memory
-	writeNewLineToLog
+	writeNewLineToLog le_exit_error
 	writeWithNewLine createStringMappingFileInMemory, str1, le_exit_error
 	mov rax,[input_image]
 	add rax,4
@@ -35,14 +35,14 @@ loaded_file:QWORD
 	jz le_exit_error
 
 	;loading import table
-	writeNewLineToLog
+	writeNewLineToLog le_exit_error
 	writeWithNewLine createStringLoadingFilesAPIs, str1, le_exit_error
 	fastcall loadImportTable, [loaded_file]
 	test rax,rax
 	jz le_exit_error
 
 	;set the correct permissions for each section
-	writeNewLineToLog
+	writeNewLineToLog le_exit_error
 	writeWithNewLine createStringSettingPermissions, str1, le_exit_error
 	mov rax,[input_image]
 	add rax,4
@@ -83,9 +83,7 @@ local str1[256]:BYTE, import_table:QWORD, null_directory_entry[sizeof.IMAGE_IMPO
 	;pointer to import table now in eax
 	mov [import_table],rax
 	writeWithNewLine createStringFoundImportTable, str1, le_exit_error
-	writeRegisterToLog [import_table]
-	test rax,rax
-	jz pit_exit_error
+	writeRegisterToLog [import_table], pit_exit_error
 
 	;init null directory entry
 	lea r8,[null_directory_entry]
@@ -134,21 +132,15 @@ local str1[256]:BYTE, lookup_table:QWORD, import_address_table:QWORD, dll_image_
 	mov [directory_entry],rdx
 
 	;write info about data directory table to logfile
-	writeNewLineToLog
-	test rax,rax
-	jz lidt_exit_error
+	writeNewLineToLog lidt_exit_error
 	writeWithNewLine createStringProcessImportDirectory, str1, lidt_exit_error
 	mov rax,[directory_entry]
 	mov eax,[rax+IMAGE_IMPORT_DESCRIPTOR.Name_]
 	add rax,[image_base]
 	mov rbx,rax
 	;pointer to dll name in ebx
-	writeLog rax
-	test rax,rax
-	jz lidt_exit_error
-	writeNewLineToLog
-	test rax,rax
-	jz lidt_exit_error
+	writeLog rax, lidt_exit_error
+	writeNewLineToLog lidt_exit_error
 
 	;load the corresponding dll
 	invoke LoadLibrary, rbx
@@ -189,18 +181,12 @@ lidt_next_lookup_entry:
 lidt_byname:
 	createStringName str1
 	lea rax,[str1]
-	writeLog rax
-	test rax,rax
-	jz lidt_exit_error
+	writeLog rax, lidt_exit_error
 	add rbx,[image_base] ;according to spec, first 32 bits are 0, therefore add is possible
 	lea rbx,[rbx+IMAGE_IMPORT_BY_NAME.Name_]
 	mov rax,rbx ;pointer to API name is now in rax and rbx
-	writeLog rax
-	test rax,rax
-	jz lidt_exit_error
-	writeNewLineToLog
-	test rax,rax
-	jz lidt_exit_error
+	writeLog rax, lidt_exit_error
+	writeNewLineToLog lidt_exit_error
 	;API name pointer in rbx
 	invoke GetProcAddress, [dll_image_base], rbx
 	test rax,rax
@@ -215,16 +201,12 @@ lidt_byname:
 lidt_byordinal:
 	createStringOrdinal str1
 	lea rax,[str1]
-	writeLog rax
-	test rax,rax
-	jz lidt_exit_error
+	writeLog rax, lidt_exit_error
 	;remove the ordinal flag
 	mov rcx,IMAGE_ORDINAL_FLAG64
 	xor rbx,rcx
 	mov rax,rbx
-	writeRegisterToLog rax
-	test rax,rax
-	jz pit_exit_error
+	writeRegisterToLog rax, lidt_exit_error
 	;API ordinal in rbx
 	invoke GetProcAddress, [dll_image_base], rbx
 	test rax,rax
@@ -292,9 +274,7 @@ pe_header_size:QWORD, str1[256]:BYTE, vprotect_ret:QWORD
 	jz sp_exit_error
 
 	;some output for the user
-	writeRegisterToLog [image_base]
-	test rax,rax
-	jz sp_exit_error
+	writeRegisterToLog [image_base], sp_exit_error
 
 	;set the section page permissions
 	mov r12,[number_of_sections]
@@ -350,9 +330,7 @@ str1[256]:BYTE, vprotect_ret:QWORD, section_headers:QWORD, pe_header_size:QWORD
 
 	;some output for the user
 	writeWithNewLine createStringLoadedPEHeader, str1, lf_exit_error
-	writeRegisterToLog [image_base]
-	test rax,rax
-	jz lf_exit_error
+	writeRegisterToLog [image_base], lf_exit_error
 
 	mov rdx,[aux] ;restore rdx
 	;continue search for section header
@@ -434,12 +412,12 @@ local str1[256]:BYTE
 	mov r12, rdi
 	rep movsb
 	mov rdi, r12
-	writeLog rdi
-	writeNewLineToLog
+	writeLog rdi, ls_exit_error
+	writeNewLineToLog ls_exit_error
 	mov rdx,[section_header]
 	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
 	add rax,[image_base]
-	writeRegisterToLog rax
+	writeRegisterToLog rax, ls_exit_error
 
 ls_exit_success:
 	mov rax,1
@@ -517,7 +495,7 @@ ssn_set_memory:
 	mov rdx,[section_header]
 	mov eax,[rdx+IMAGE_SECTION_HEADER.VirtualAddress]
 	add rax,[image_base]
-	writeRegisterToLog rax
+	writeRegisterToLog rax, ssn_exit_error
 
 ssn_exit_success:
 	mov rax,1
