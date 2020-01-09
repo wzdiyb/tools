@@ -5,15 +5,13 @@
 ;create 2 lookup tables for multiplication in the
 ;galois field with 2 and 3
 proc createGaloisEncryption uses rdi rsi, mul2_ptr:QWORD, mul3_ptr:QWORD
-     mov [mul2_ptr],rcx
-     mov [mul3_ptr],rdx
 
-     mov rdi,[mul2_ptr]
+     mov rdi,rcx
      mov rsi,galois_mul2
      mov rcx,GALOIS_SIZE
      repz movsb
 
-     mov rdi,[mul3_ptr]
+     mov rdi,rdx
      mov rsi,galois_mul3
      mov rcx,GALOIS_SIZE
      repz movsb
@@ -61,27 +59,22 @@ endp
 proc createGaloisDecryption uses rdi rsi, mul9_ptr:DWORD, mul11_ptr:QWORD,\
      mul13_ptr:QWORD, mul14_ptr:QWORD
 
-     mov [mul9_ptr],rcx
-     mov [mul11_ptr],rdx
-     mov [mul13_ptr],r8
-     mov [mul14_ptr],r9
-
-     mov rdi,[mul9_ptr]
+     mov rdi,rcx
      mov rsi,galois_mul9
      mov rcx,GALOIS_SIZE
      repz movsb
 
-     mov rdi,[mul11_ptr]
+     mov rdi,rdx
      mov rsi,galois_mul11
      mov rcx,GALOIS_SIZE
      repz movsb
 
-     mov rdi,[mul13_ptr]
+     mov rdi,r8
      mov rsi,galois_mul13
      mov rcx,GALOIS_SIZE
      repz movsb
 
-     mov rdi,[mul14_ptr]
+     mov rdi,r9
      mov rsi,galois_mul14
      mov rcx,GALOIS_SIZE
      repz movsb

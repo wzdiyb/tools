@@ -2,9 +2,8 @@
 ;add garbage code, split up array into sub-arrays, reverse order, etc.
 ;to hide rcon where its neccessary
 proc createSBox uses rdi rsi, sbox_ptr:QWORD
-     mov [sbox_ptr],rcx
 
-     mov rdi,[sbox_ptr]
+     mov rdi,rcx
      mov rsi,sbox_array
      mov rcx,SBOX_SIZE
      repz movsb
@@ -30,9 +29,8 @@ endp
 
 ;the inverted sbox for decryption
 proc createInvertSBox uses rsi rdi, sbox_ptr:QWORD
-     mov [sbox_ptr],rcx
 
-     mov rdi,[sbox_ptr]
+     mov rdi,rcx
      mov rsi,i_sbox_array
      mov rcx,SBOX_SIZE
      repz movsb

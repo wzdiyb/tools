@@ -2,9 +2,8 @@
 ;add garbage code, split up array into sub-arrays, reverse order, etc.
 ;to hide rcon where its neccessary
 proc createRcon uses rsi rdi, rcon_ptr:QWORD
-     mov [rcon_ptr],rcx
 
-     mov rdi,[rcon_ptr]
+     mov rdi,rcx
      mov rsi,rcon_array
      mov rcx,RCON_SIZE
      repz movsb
