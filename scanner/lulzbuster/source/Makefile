@@ -54,15 +54,16 @@ CP = cp -r
 MKDIR = mkdir -p
 STRIP = strip
 
-INSTDIR = /usr/local/bin
-SHAREDIR = /usr/local/share/lulzbuster
-DOCDIR = /usr/local/share/doc/lulzbuster
-LICENSEDIR = /usr/local/share/licenses/lulzbuster
+DESTDIR = /usr/local
+INSTDIR = $(DESTDIR)/bin
+SHAREDIR = $(DESTDIR)/share/lulzbuster
+DOCDIR = $(DESTDIR)/share/doc/lulzbuster
+LICENSEDIR = $(DESTDIR)/share/licenses/lulzbuster
 
 INCDIR = inc
 SRCDIR = src
 
-CFLAGS += -W -Wall -Wextra -O2 -fstack-protector-all -fPIE -fPIC -pthread
+CFLAGS += -W -Wall -Wextra -O3 -fstack-protector-all -fPIE -fPIC -pthread
 CFLAGS += -D_FORTIFY_SOURCE=2 -Wl,-z,now -Wl,-z,relro -I $(INCDIR)
 
 LDFLAGS = -lcurl
@@ -91,6 +92,7 @@ lulzbuster: $(OBJS)
 	$(STRIP) lulzbuster
 
 install:
+	$(MKDIR) $(INSTDIR)
 	$(MKDIR) $(SHAREDIR)
 	$(MKDIR) $(DOCDIR)
 	$(MKDIR) $(LICENSEDIR)
@@ -98,7 +100,7 @@ install:
 	$(CP) docs/LICENSE $(LICENSEDIR)/
 	$(CP) docs/* $(DOCDIR)/
 	$(RM) $(DOCDIR)/LICENSE
-	$(MV) lulzbuster $(INSTDIR)
+	$(MV) lulzbuster $(INSTDIR)/
 
 uninstall:
 	$(RM) $(INSTDIR)/lulzbuster $(SHAREDIR) $(DOCDIR) $(LICENSEDIR)
