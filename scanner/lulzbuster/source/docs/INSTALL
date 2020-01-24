@@ -1,0 +1,4 @@
+libcurl >= 7.62.0 is needed!
+
+type 'make lulzbuster' to build
+type 'sudo make install' to install
