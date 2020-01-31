@@ -46,7 +46,7 @@
 #define DEF_USERAGENT           "Mozilla/5.0 (Windows NT 10.0; Win64; x64; " \
   "rv:72.0) Gecko/20100101 Firefox/72.0"
 #define DEF_RAND_UA             OFF
-#define DEF_AUTOREF_UPDATE      ON
+#define DEF_AUTOREF_UPDATE      OFF
 #define DEF_THREADS             30
 #define DEF_CONN_CACHE          30
 #define DEF_DELAY               OFF
@@ -57,6 +57,7 @@
 #define DEF_IN_SSL              OFF
 #define DEF_NAMESERVER          "1.1.1.1,8.8.8.8,208.67.222.222"
 
+
 /* max/min num values for errors and warnings */
 #define MAX_THRDS         256
 #define MAX_DELAY         60
@@ -64,6 +65,7 @@
 #define MAX_REQ_TIMEOUT   60
 #define MIN_GLOB_TIMEOUT  600
 #define MAX_CONN_CACHE    100
+
 
 /* print infos about final set options prior scan start - sorry, dirty */
 #define FP  fprintf
@@ -143,8 +145,10 @@ typedef struct {
   const char *start_url;            /* target start url (-u) */
   url_T parsed_url;                 /* parsed start_url */
   char **attack_urls;               /* dyn. built attack urls */
+  unsigned long num_attack_urls;    /* num attack urls */
   char *http_method;                /* http request method (-h) */
   long int *http_ex_codes;          /* exclude http status codes (-x) */
+  size_t num_http_ex_codes;         /* num excluded http status codes */
   unsigned char follow_redir;       /* follow redirect (-f) */
   long follow_redir_level;          /* max level to follow redirect (-i) */
   char *useragent;                  /* user-agent string (-U) */

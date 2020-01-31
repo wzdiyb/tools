@@ -275,7 +275,7 @@ unsigned char set_http_options(opts_T *opts)
 void set_extensions(opts_T *opts)
 {
   char **tptr = NULL;
-  size_t i = 0;
+  register size_t i = 0;
 
   /* count num extensions. if none given add a ""-extension to fool */
   if (opts->extens != NULL) {
@@ -291,11 +291,11 @@ void set_extensions(opts_T *opts)
 }
 
 
-/* set attack_urls */
+/* set attack_urls, count final urls and http ex codes */
 void set_attack_urls(opts_T *opts)
 {
-  char **tmpwords = NULL;
-  size_t i = 0, num_words = 0;
+  char **tmpwords = NULL, **tptr = NULL;
+  register size_t i = 0, num_words = 0;
 
   /* wc -l $wordlist */
   if ((num_words = count_lines(opts->wordlist)) == 0) {
@@ -316,6 +316,13 @@ void set_attack_urls(opts_T *opts)
   /* build attack urls */
   opts->attack_urls = build_urls(opts->start_url, tmpwords, num_words,
                                  opts->extens, opts->num_extens);
+
+  /* get num attack_urls */
+  for (tptr = opts->attack_urls; *tptr != NULL; ++tptr,
+       ++opts->num_attack_urls);
+
+  /* get num http ex codes */
+  for (i = 0; opts->http_ex_codes[i] != 0; ++i, ++opts->num_http_ex_codes);
 
   /* we are done with tmpwords. free that shit */
   for (i = 0; i < num_words + 1; ++i)
@@ -395,7 +402,7 @@ void parse_opts(int argc, char *argv[], opts_T *opts)
        opts->creds = optarg;
        break;
      case 'r':
-       opts->autoref = OFF;
+       opts->autoref = ON;
        break;
      case 'j':
        opts->http_version = optarg;

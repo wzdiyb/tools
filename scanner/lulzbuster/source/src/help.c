@@ -28,7 +28,7 @@
 /* leet banner, very important */
 void banner()
 {
-  CLOG(stderr, "%s\n", CBLUE BANNER CNORM SUB_BANNER);
+  CLOG(stderr, "%s\n", CBLUE BANNER CRESET SUB_BANNER);
 
   return;
 }
@@ -38,11 +38,11 @@ void banner()
 void usage()
 {
   CLOG(stderr, "%s",
-  CBOLD"usage"CNORM"\n\n"
+  CBOLD"usage"CRESET"\n\n"
   "  lulzbuster -s <arg> [opts] | <misc>\n\n"
-  CBOLD"target options"CNORM"\n\n"
+  CBOLD"target options"CRESET"\n\n"
   "  -s <url>       - start url to begin scan with\n\n"
-  CBOLD"http options"CNORM"\n\n"
+  CBOLD"http options"CRESET"\n\n"
   "  -h <type>      - http request type (default: GET) - ? to list types\n"
   "  -x <code>      - exclude http status codes (default: 404,503 - multi\n"
   "                   codes separated by ',')\n"
@@ -53,19 +53,19 @@ void usage()
   "  -U             - use random built-in user-agents\n"
   "  -c <str>       - pass custom header(s) (e.g. 'Cookie: foo=bar; lol=lulz')\n"
   "  -a <creds>     - http auth credentials (format: <user>:<pass>)\n"
-  "  -r             - turn off auto update referrer\n"
+  "  -r             - turn on auto update referrer\n"
   "  -j <num>       - define http version (default: curl's default) - ? to list"
-  CBOLD"\n\ntimeout options"CNORM"\n\n"
+  CBOLD"\n\ntimeout options"CRESET"\n\n"
   "  -D <num>       - num seconds for delay between requests (default: 0)\n"
   "  -C <num>       - num seconds for connect timeout (default: 10)\n"
   "  -R <num>       - num seconds for request timeout (default: 30)\n"
   "  -T <num>       - num seconds to give up and exit lulzbuster completely\n"
   "                   (default: none)\n\n"
-  CBOLD"tuning options"CNORM"\n\n"
+  CBOLD"tuning options"CRESET"\n\n"
   "  -t <num>       - num threads for concurrent scanning (default: 30)\n"
   "  -g <num>       - num connection cache size for curl (default: 30)\n"
   "                   note: this value should always equal to -t's value\n\n"
-  CBOLD"other options"CNORM"\n\n"
+  CBOLD"other options"CRESET"\n\n"
   "  -w <file>      - wordlist file\n"
   "                   (default: "DEF_WORDLIST")\n"
   "  -A <str>       - append any words separated by comma (e.g. '/,.php,~bak)\n"
@@ -78,7 +78,7 @@ void usage()
   "  -n <str>       - nameservers (default: '1.1.1.1,8.8.8.8,208.67.222.222'\n"
   "                   multi separated by '.')\n"
   "  -l <file>      - logfile for found valid urls (default: stdout)\n\n"
-  CBOLD"misc"CNORM"\n\n"
+  CBOLD"misc"CRESET"\n\n"
   "  -X             - print built-in user-agents\n"
   "  -V             - print version of lulzbuster and exit\n"
   "  -H             - print this help and exit\n\n"

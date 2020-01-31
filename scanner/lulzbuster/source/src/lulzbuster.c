@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
   check_args(opts);
 
   /* set extensions and attack urls */
+  JSLOG("building attack urls\n");
   set_extensions(opts);
   set_attack_urls(opts);
 
@@ -71,12 +72,11 @@ int main(int argc, char *argv[])
 
   /* check for wildcard HTTP-200 response */
   JSLOG("wildcard check (HTTP 200)\n");
-  if (wcard.resp_code == 200) {
+  if (wcard.resp_code == HTTP_OK) {
     WSLOG("wildcard response for ANY resource request\n");
   } else {
     GSLOG("lulz! no wildcard detected\n");
   }
-
   /* we need wildcard data for attacks */
   opts->wcard = wcard;
 

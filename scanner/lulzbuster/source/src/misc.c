@@ -32,7 +32,7 @@ char **build_urls(const char *url, char **wordlist, const size_t num_words,
                   char **extens, const size_t num_extens)
 {
   char **urls = NULL, *fmtstr = "%s/%s%s";
-  size_t line_len = 0, url_len = 0, sum = 0, i = 0, j = 0, k = 0;
+  register size_t line_len = 0, url_len = 0, sum = 0, i = 0, j = 0, k = 0;
 
   /* check for ending '/' in url */
   url_len = strlen(url) - 1;
@@ -69,7 +69,7 @@ char **read_lines(const char *filename, size_t line_len, const int lastchar)
 {
   FILE *fp = NULL;
   char **lines = NULL;
-  size_t cur_len = 0, last = 0, i = 0;
+  register size_t cur_len = 0, last = 0, i = 0;
 
   if ((fp = fopen(filename, "r")) == NULL) {
     return NULL;
@@ -77,7 +77,7 @@ char **read_lines(const char *filename, size_t line_len, const int lastchar)
 
   /* let's set default then: 2KB */
   if (line_len == 0) {
-    line_len = 2048;
+    line_len = DEF_LINE_LEN;
   }
 
   lines = xcalloc(1, sizeof (char *));

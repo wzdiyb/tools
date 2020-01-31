@@ -12,7 +12,7 @@ ChangeLog and TODO list for lulzbuster
   [ ] attack.c: attack(): collect hits table. if 200 was given with same size
       over X times -> claim false-positive
   [ ] attack.c: attack(): make smarter: for wildcard part: check also a few
-      bytes of conten before claiming false-positive.
+      bytes of content before claiming false-positive.
   [ ] http.c: do_req(): handle errors in a pragmatic way: count for X errors and
       then offer something to do as next or give up
   [ ] make better LOG functions and define them clearly so we can use it
@@ -21,6 +21,18 @@ ChangeLog and TODO list for lulzbuster
       probably would need to fetch location header and build/set new url :s
   [ ] grep for 'TODO' and fix/implement them
   [ ] really, clean up and refactor the code a bit where necessary
+
+
+===> 1.1.0
+
+  [x] update: by default, turn off 'auto update referrer' of curl
+  [x] update: count num http ex codes outside of attack.c
+  [x] update: count num attack urls outside of attack.c
+  [x] update: set max line length (1024 bytes) to read from wordlists
+  [x] update: skip the curl-error checks in switch-case in do_req() for now,
+      since we don't use it currently in pragmatic way anyway
+  [x] update: use a few register variables
+  [x] bugfix: fix wrong color reset code
 
 
 ===> 1.0.0

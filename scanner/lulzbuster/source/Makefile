@@ -26,7 +26,7 @@ ifeq ($(shell test $(VER) -lt 7680; echo $$?),0)
 endif
 
 DEBIAN = $(shell if egrep -i 'debian|ubuntu' /proc/version > /dev/null 2>&1; \
-			 then echo 1 ; fi)
+				 then echo 1 ; fi)
 ifeq ($(DEBIAN), 1)
 	ECHO = "echo"
 else
@@ -63,8 +63,9 @@ LICENSEDIR = $(DESTDIR)/share/licenses/lulzbuster
 INCDIR = inc
 SRCDIR = src
 
-CFLAGS += -W -Wall -Wextra -O3 -fstack-protector-all -fPIE -fPIC -pthread
-CFLAGS += -D_FORTIFY_SOURCE=2 -Wl,-z,now -Wl,-z,relro -I $(INCDIR)
+CFLAGS += -W -Wall -Wextra -O2 -pthread -I $(INCDIR)
+#CFLAGS += -W -Wall -Wextra -O3 -g -g3 -ggdb -fstack-protector-all -fPIE -fPIC
+#CFLAGS += -pthread -D_FORTIFY_SOURCE=2 -Wl,-z,now -Wl,-z,relro -I $(INCDIR)
 
 LDFLAGS = -lcurl
 
@@ -89,7 +90,7 @@ default:
 
 lulzbuster: $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
-	$(STRIP) lulzbuster
+	#$(STRIP) lulzbuster
 
 install:
 	$(MKDIR) $(INSTDIR)

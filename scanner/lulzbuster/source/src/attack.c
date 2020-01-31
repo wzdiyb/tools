@@ -40,9 +40,9 @@ static void *attack(job_T *);
 static void *attack(job_T *job)
 {
   curl_off_t real_size = 0, size = 0;
-  double bytes = 0;
+  register double bytes = 0;
   static size_t curjob = 0;
-  size_t i = 0;
+  register size_t i = 0;
   long code = 0;
   char suf = 'B';
 
@@ -84,7 +84,7 @@ static void *attack(job_T *job)
   if (code != 0 && code != HTTP_NOT_FOUND) {
     /* do smart checks */
     if (job->smart == TRUE) {
-      /* return NULL if equal to our initial wildcard probe's size */
+      /* return NULL if equal to our initial wildcard-probe size */
       if (code == job->wcard.resp_code) {
         if (real_size == job->wcard.resp_size) {
           curl_easy_cleanup(job->eh);
@@ -106,20 +106,13 @@ static void *attack(job_T *job)
 /* start scanning */
 void launch_attack(opts_T *opts)
 {
-  char **tptr = NULL;
-  size_t num_jobs = 0, num_ex_codes = 0, i = 0;
+  register size_t i = 0;
   job_T **job = NULL;
   threadpool thpool = NULL;
   FILE *logfile = stderr;
 
-  /* get num job size */
-  for (tptr = opts->attack_urls; *tptr != NULL; ++tptr, ++num_jobs);
-
-  /* get num http_ex_codes */
-  for (i = 0; opts->http_ex_codes[i] != 0; ++i, ++num_ex_codes);
-
   /* alloc buf for job structs and create/init threadpool */
-  job = xcalloc(num_jobs, sizeof(*job));
+  job = xcalloc(opts->num_attack_urls, sizeof(*job));
   thpool = thpool_init(opts->threads);
 
   /* init phtread locks */
@@ -142,15 +135,15 @@ void launch_attack(opts_T *opts)
   }
 
   /* initiate needed opts, add attacker threads to pool and fire shit */
-  for (i = 0; i < num_jobs; ++i) {
+  for (i = 0; i < opts->num_attack_urls; ++i) {
     job[i] = xcalloc(1, sizeof(job_T));
     job[i]->delay = opts->delay;
     job[i]->wcard = opts->wcard;
     job[i]->logfile = logfile;
     job[i]->smart = opts->smart;
-    job[i]->num_jobs = num_jobs;
-    job[i]->num_ex_codes = num_ex_codes;
+    job[i]->num_jobs = opts->num_attack_urls;
     job[i]->http_ex_codes = opts->http_ex_codes;
+    job[i]->num_ex_codes = opts->num_http_ex_codes;
     job[i]->rand_ua = opts->rand_ua;
     job[i]->url = opts->attack_urls[i];
     job[i]->eh = curl_easy_duphandle(opts->curl->eh);
@@ -164,7 +157,7 @@ void launch_attack(opts_T *opts)
   kill_locks();
 
   /* free job */
-  for (i = 0; i < num_jobs; ++i) {
+  for (i = 0; i < opts->num_attack_urls; ++i) {
     free(job[i]);
   }
   free(job);

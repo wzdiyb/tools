@@ -42,7 +42,7 @@
 /* hit line */
 #define __HIT(log) \
   if (log == stderr) {\
-    CLOG(log, BGREEN"\r[*] "CNORM"%ld - %6.0lf%c %s\n", code, bytes, suf, \
+    CLOG(log, BGREEN"\r[*] "CRESET"%ld - %6.0lf%c %s\n", code, bytes, suf, \
          job->url); \
   } \
   else {\
@@ -52,7 +52,7 @@
 /* status line */
 #define PERCENT (double) (curjob * 100) / (double) job->num_jobs
 #define __STATUS \
-  CLOG(stderr, "\r"BBLUE"[+]"CNORM" scanning %lu / %lu (%.2f%%)", curjob, \
+  CLOG(stderr, "\r"BBLUE"[+]"CRESET" scanning %lu / %lu (%.2f%%)", curjob, \
        job->num_jobs, PERCENT)
 
 

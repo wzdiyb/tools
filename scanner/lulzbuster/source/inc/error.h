@@ -41,8 +41,8 @@
 
 
 /* just shortenings */
-#define RED   CRED PERR CNORM
-#define YEL   CYELLOW PWARN CNORM
+#define RED   CRED PERR CRESET
+#define YEL   CYELLOW PWARN CRESET
 
 
 /* error codes */

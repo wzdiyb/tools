@@ -71,7 +71,7 @@ void check_argc(int argc)
 /* check URL format */
 static unsigned char check_url(const char *target_url)
 {
-  unsigned char check_ok = TRUE;
+  register unsigned char check_ok = TRUE;
   char *scheme = NULL;
   CURLUcode rc = 0;
   CURLU *url = curl_url();
@@ -99,8 +99,8 @@ static unsigned char check_url(const char *target_url)
 /* check HTTP request type */
 static unsigned char check_http_method(char *http_method)
 {
-  unsigned char check_ok = FALSE;
-  size_t j = 0, len = strlen(http_method) + 1;
+  register unsigned char check_ok = FALSE;
+  register size_t j = 0, len = strlen(http_method) + 1;
   char *http_methods[] = {
     HTTP_HEAD, HTTP_GET, HTTP_POST, HTTP_PUT, HTTP_DELETE, HTTP_OPTIONS,
   };
@@ -134,7 +134,7 @@ static unsigned char check_http_method(char *http_method)
 /* check if we can open and read given file */
 static unsigned char check_file(const char *file, int mode)
 {
-  unsigned char check_ok = FALSE;
+  register unsigned char check_ok = FALSE;
   FILE *fp = NULL;
 
   /* we need to create file if it does not exist before checking for W_OK bit */
@@ -166,7 +166,7 @@ static unsigned char check_file(const char *file, int mode)
 static unsigned char check_num(const unsigned short int num,
                                const unsigned short int val)
 {
-  unsigned char check_ok = FALSE;
+  register unsigned char check_ok = FALSE;
 
   switch (val) {
    case MAX_THRDS:
@@ -192,7 +192,7 @@ static unsigned char check_num(const unsigned short int num,
 /* check if credentials format is correct */
 static unsigned char check_creds(const char *str)
 {
-  unsigned char check_ok = FALSE;
+  register unsigned char check_ok = FALSE;
 
   if (str[0] && str[1]) {
     check_ok = TRUE;
@@ -205,8 +205,8 @@ static unsigned char check_creds(const char *str)
 /* check if correct scheme and <num> parts were given for proxy */
 static unsigned char check_proxy(char *str)
 {
-  unsigned char check_ok = TRUE;
-  size_t i = 0, len = strlen(str) + 1;
+  register unsigned char check_ok = TRUE;
+  register size_t i = 0, len = strlen(str) + 1;
   char tmpstr[len];
   char **pstr = NULL,
        *proxy_schemes[] = {
@@ -261,7 +261,7 @@ static unsigned char check_proxy(char *str)
 /* check if port is really between 0 and 65535 */
 static unsigned char check_port(const char *port)
 {
-  unsigned char check_ok = TRUE;
+  register unsigned char check_ok = TRUE;
   long int p = 0;
 
   p = ATOI(port);
@@ -278,9 +278,9 @@ static unsigned char check_port(const char *port)
 /* check if a valid http version was specified */
 static unsigned char check_http_version(const char *ver)
 {
-  unsigned char check_ok = TRUE;
+  register unsigned char check_ok = TRUE;
   char *http_vers[] = { HTTP_VER_10, HTTP_VER_11, HTTP_VER_20, HTTP_VER_30 };
-  size_t i = 0;
+  register size_t i = 0;
 
   if (ver[0] == '?') {
     JSLOG("available http versions\n\n");
@@ -306,7 +306,7 @@ static unsigned char check_http_version(const char *ver)
 /* perform basic checks on all cmdline opts */
 void check_opts(opts_T *opts)
 {
-  unsigned char check_ok = FALSE;
+  register unsigned char check_ok = FALSE;
 
   /* check if a correct/full HTTP url was given for target start url */
   if (!check_url(opts->start_url)) {

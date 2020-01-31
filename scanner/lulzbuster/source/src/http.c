@@ -118,8 +118,8 @@ static pthread_mutex_t locks[NUM_LOCKS];
 static char *rand_url(const char *url)
 {
   char *randurl = NULL;
-  int randno = 0;
-  size_t randurl_size = 0;
+  register int randno = 0;
+  register size_t randurl_size = 0;
 
   srand(time(NULL));
   randno = rand();
@@ -194,7 +194,7 @@ url_T parse_url(const char *url)
 /* randomly fetch an useragent from useragents tables */
 const char *get_rand_useragent()
 {
-  int size = ARRAY_SIZE(useragents);
+  register int size = ARRAY_SIZE(useragents);
 
   srand(time(NULL));
 
@@ -206,7 +206,7 @@ const char *get_rand_useragent()
 void print_useragents()
 {
   char *buff = NULL, *fmtstr = "%-10s | %-11s | %s\n";
-  size_t i = 0, len = 0, num_items = 0;
+  register size_t i = 0, len = 0, num_items = 0;
 
   num_items = ARRAY_SIZE(useragents);
 
@@ -246,7 +246,7 @@ unsigned char cleanup_http(curl_T *curl)
 /* do some necessary curl related inits */
 unsigned char init_http(curl_T *curl)
 {
-  unsigned char check_ok = TRUE;
+  register unsigned char check_ok = TRUE;
 
   /* curl global init */
   if (curl_global_init(CURL_GLOBAL_ALL) != 0) {
@@ -306,7 +306,7 @@ void lock_cb(CURL *handle, curl_lock_data data, curl_lock_access access,
 /* destroy initiated locks */
 unsigned char kill_locks(void)
 {
-  size_t i = 0;
+  register size_t i = 0;
 
   for (i = 0; i < NUM_LOCKS; ++i) {
     if (pthread_mutex_destroy(&locks[i]) != 0) {
@@ -322,7 +322,7 @@ unsigned char kill_locks(void)
 /* init pthread mutex locks */
 unsigned char init_locks(void)
 {
-  size_t i = 0;
+  register size_t i = 0;
 
   for (i = 0; i < NUM_LOCKS; ++i) {
     if (pthread_mutex_init(&locks[i], NULL) != 0) {
@@ -350,18 +350,19 @@ size_t write_cb(void *buff, size_t size, size_t nmemb, void *userptr)
 /* do http request for our attack worker thread */
 unsigned char do_req(const char *url, CURL *handler, CURLSH *share)
 {
-  unsigned char check_ok = TRUE;
-  static unsigned char num_err = 0;
-  CURLcode res = 0;
+  register unsigned char check_ok = TRUE;
+  /* static unsigned char num_err = 0;
+  CURLcode res = 0; */
 
   /* set url and use shared object for our easy handlers */
   curl_easy_setopt(handler, CURLOPT_URL, url);
   curl_easy_setopt(handler, CURLOPT_SHARE, share);
 
+  curl_easy_perform(handler);
   /* fire request. print error message in case something went wrong.
    * note: we could use CURLOPT_ERRORBUFFER here instead but the generic msg
    * from curl are enough.
-   * TODO: be more pragmatic here and handle this correctly (stats, etc.) */
+   * TODO: be more pragmatic here and handle this correctly (stats, etc.)
   res = curl_easy_perform(handler);
   switch (res) {
    case CURLE_OK:
@@ -417,6 +418,7 @@ unsigned char do_req(const char *url, CURL *handler, CURLSH *share)
        WSLOG("unknown curl error: %s\n", curl_easy_strerror(res));
      }
   }
+  */
 
   return check_ok;
 }
