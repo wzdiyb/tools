@@ -39,11 +39,11 @@
 
 
 /* escape sequences */
-#define CBLUE     "\033[1;34;40m"
-#define CRED      "\033[1;31;40m"
-#define CYELLOW   "\033[1;33;40m"
-#define CGREEN    "\033[1;32;40m"
-#define CBOLD     "\033[1;37;40m"
+#define CBLUE     "\033[1;34;10m"
+#define CRED      "\033[1;31;10m"
+#define CYELLOW   "\033[1;33;10m"
+#define CGREEN    "\033[1;32;10m"
+#define CBOLD     "\033[1;37;10m"
 #define CRESET    "\033[0m"
 
 
